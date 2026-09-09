@@ -1,0 +1,28 @@
+{
+  "chain": "Ethereum",
+  "chainId": 1,
+  "rpc": "$ETHEREUM_RPC_URL",
+  "explorer": "https://etherscan.io",
+  "contracts": {
+    "EthYieldVault": {
+      "address": "0x0000000000000000000000000000000000000000",
+      "status": "dry-run",
+      "constructorArgs": ["address(USDC)", "vETH", "vETH"],
+      "strategy": {
+        "ethChainId": 1,
+        "pool": "0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e",
+        "farm": "0x51F16AC6345d21DfD9d54ee9d36D5aCC66225cfE",
+        "slippage": 100,
+        "version": 1
+      },
+      "realAddresses": {
+        "positionManager": "0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e",
+        "kyberFarm": "0x51F16AC6345d21DfD9d54ee9d36D5aCC66225cfE",
+        "kyberRouter": "0x098697bA3Fee4eA76294C5d6A466a4e3b3E95FE6",
+        "WETH": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      }
+    }
+  },
+  "notes": "Fork-tested against mainnet tx 0xff851d56e4a8a98234170f28a798894499c65b7e43cf018f1591a8f68475ed06. PositionManager and Kyber contracts verified on mainnet."
+}

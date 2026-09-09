@@ -1,0 +1,15 @@
+{
+  "chain": "Robinhood",
+  "chainId": 4663,
+  "rpc": "$ROBINHOOD_RPC_URL",
+  "explorer": "https://robinhoodchain.blockscout.com",
+  "contracts": {
+    "RobinhoodDepositAdapter": {
+      "address": "0x0000000000000000000000000000000000000000",
+      "status": "dry-run",
+      "constructorArgs": ["address(OL_TOKEN)", "address(STABLE_TOKEN)", "uint256(500)", "address(ROUTER)"],
+      "feeBps": 0
+    }
+  },
+  "notes": "OpenLaunch token not yet launched. Robinhood RPC not available for dry-run."
+}
