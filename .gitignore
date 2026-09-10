@@ -4,6 +4,9 @@ out/
 lib/
 vite/node_modules/
 .opencode/
+TODO.md
+TODO_BLOCKED.md
+PseudoCode.md
 
 # Ignores development broadcast logs
 !/broadcast
