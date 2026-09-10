@@ -3,6 +3,7 @@ cache/
 out/
 lib/
 vite/node_modules/
+.opencode/
 
 # Ignores development broadcast logs
 !/broadcast
