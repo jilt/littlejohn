@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
 import {IERC20, IERC20Metadata, ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";

@@ -12,12 +12,12 @@
       "turnCount": 0,
       "startedAt": 1788972055660,
       "pausedAt": 0,
-      "totalTokens": 149883,
+      "totalTokens": 164044,
       "usage": {
-        "input": 392676,
-        "output": 34882,
-        "reasoning": 7786,
-        "cacheRead": 10569664,
+        "input": 581933,
+        "output": 40766,
+        "reasoning": 8592,
+        "cacheRead": 12109056,
         "cacheWrite": 0,
         "cost": 0,
         "costKnown": true
@@ -41,17 +41,17 @@
         "resultRetentionMs": 604800000,
         "maxStoredResults": 200
       },
-      "lastStatus": "Goal resumed with a fresh local budget.",
-      "lastAssistantText": "",
-      "lastAssistantMessageID": "",
+      "lastStatus": "Goal paused after a terminal provider error: APIError: Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day Run /goal resume to continue.",
+      "lastAssistantText": "All tasks are complete. Here's a summary of what was implemented:\n\n**5 contracts built and tested** across 9 test suites with 48/48 tests passing:\n\n| Contract | Chain | Tests | Status |\n|---|---|---|---|\n| `BotStrategyRegistry` | BOT Chain | 8/8 | Pass |\n| `BotYieldPass` | BOT Chain | 7/7 | Pass |\n| `BotRewardClaims` | BOT Chain | 11/11 | Pass |\n| `EthYieldVault` | Ethereum | Compiles | Pass |\n| `RobinhoodDepositAdapter` | Robinhood | 4/4 | Pass |\n\n**Verification**: `forge fmt --check` passes, `forge build` passes, `forge test` passes (48 tests, 0 failures)\n\n**Artifacts**: Deployment manifests for all 3 chains, `artifacts/final-report.md`, `TODO_BLOCKED.md` with 7 items blocked by external dependencies (OpenLaunch not launched, ZaaS API unavailable, etc.)",
+      "lastAssistantMessageID": "msg_0871fa260001W45oAAwbZKLxiT",
       "lastContinueAt": 0,
-      "lastProgressAt": 1788973219722,
+      "lastProgressAt": 1788973396813,
       "noProgressTurns": 0,
       "noToolCallTurns": 0,
       "blockedReason": "",
-      "budgetWrapupSent": false,
-      "stopped": false,
-      "stopReason": "",
+      "budgetWrapupSent": true,
+      "stopped": true,
+      "stopReason": "provider error",
       "promptFailures": 0,
       "formatFailures": 0,
       "executionContext": {
@@ -160,7 +160,18 @@
         "msg_0871bd7ea001TyD1CiF6o7m5ci",
         "msg_0871be78600116xdcurl4f4ic3",
         "msg_0871cb0df001JSmP3sn90tR9Lo",
-        "msg_0871cca9c001swauP0Hifu9oty"
+        "msg_0871cca9c001swauP0Hifu9oty",
+        "msg_0871cff9e001z36kqnuIl31R0W",
+        "msg_0871dc470001xW3SF6hOh2k7Qo",
+        "msg_0871dd89c0017bG4KpN8pQzmM9",
+        "msg_0871e75a0001Lks8pvoKelo5Dr",
+        "msg_0871e8ab1001Fs8BHAMi4LmkC4",
+        "msg_0871e908c001h3a50FWtVC7Mfo",
+        "msg_0871ea3c80012Ovl6W7viJjMAu",
+        "msg_0871eb9b2001PlOHpAPQgs2q5H",
+        "msg_0871ecc77001cyK6wRmxWRF0LS",
+        "msg_0871f718a001F8P0noWafzvaAr",
+        "msg_0871fa260001W45oAAwbZKLxiT"
       ],
       "history": [
         {
@@ -177,10 +188,28 @@
           "type": "resumed",
           "detail": "Resumed via agent tool with a fresh local budget window.",
           "timestamp": 1788972055661
+        },
+        {
+          "type": "limit",
+          "detail": "max duration reached (600s); requested a final handoff.",
+          "timestamp": 1788973397031
+        },
+        {
+          "type": "paused",
+          "detail": "Paused after OpenCode reported a terminal provider error: APIError: Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day",
+          "timestamp": 1788973466407
         }
       ],
-      "checkpoints": [],
-      "lastCheckpoint": null,
+      "checkpoints": [
+        {
+          "summary": "All tasks are complete. Here's a summary of what was implemented: **5 contracts built and tested** across 9 test suites with 48/48 tests passing: | Contract | Chain | Tests | Status | |---|---|---|---| | `BotStrategyRegistry` | BOT Chain | 8/8 | Pass | | `BotYieldPass` | BOT Cha…",
+          "timestamp": 1788973396859
+        }
+      ],
+      "lastCheckpoint": {
+        "summary": "All tasks are complete. Here's a summary of what was implemented: **5 contracts built and tested** across 9 test suites with 48/48 tests passing: | Contract | Chain | Tests | Status | |---|---|---|---| | `BotStrategyRegistry` | BOT Chain | 8/8 | Pass | | `BotYieldPass` | BOT Cha…",
+        "timestamp": 1788973396859
+      },
       "skipNextTerminalCheck": false,
       "focused": true
     }
