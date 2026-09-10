@@ -1,8 +1,8 @@
 # Little John Bot
 
-This project is part of https://ethical.haus/
+https://ljb.ethical.haus/
 
-A social finance experiment
+This project is part of Ethical Haus a social finance experiment
 
 ## Flow diagram
 
