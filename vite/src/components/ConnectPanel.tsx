@@ -42,8 +42,12 @@ export default function ConnectPanel() {
         </button>
       </div>
       
-      <button className="btn" onClick={disconnect} style={{ marginTop: '12px' }}>
-        Disconnect
+      <button 
+        className="btn" 
+        onClick={() => disconnect()} 
+        style={{ marginTop: '12px' }}
+    >
+  Disconnect
       </button>
     </div>
   )

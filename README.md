@@ -6,7 +6,7 @@ A social finance experiment
 
 ## Flow diagram
 
-[Phase 1](/flow-diagram/Windows-98-deposit-flow-diagram.png)
+[/flow-diagram/Windows-98-deposit-flow-diagram.png](phase 1)
 [Phase 2](/flow-diagram/Windows-98-bridge-flow-diagram.png)
 [Phase 3](/flow-diagram/Windows-98-vault-flow-diagram.png)
 [Phase 4](/flow-diagram/Windows-98-deploy-flow-diagram.png)
