@@ -14,14 +14,14 @@ export default function Taskbar({ windows, onToggle }: TaskbarProps) {
       </button>
       
       {Object.entries(windows).map(([name, isOpen]) => (
-        <button
-          key={name}
-          className={`taskbar-item ${isOpen ? 'active' : ''}`}
-          onClick={() => onToggle(name)}
-        >
-          {name.charAt(0).toUpperCase() + name.slice(1)}
-        </button>
-      ))}
+  <button
+    key={name}
+    className={`taskbar-item ${isOpen ? 'active' : ''}`}
+    onClick={() => onToggle(name as "connect" | "strategy" | "deposit" | "passes" | "rewards")}
+  >
+    {name.charAt(0).toUpperCase() + name.slice(1)}
+  </button>
+))}
       
       <div className="taskbar-tray">
         {time}
