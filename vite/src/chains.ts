@@ -1,4 +1,4 @@
-import { defineChain, http } from 'viem'
+import { defineChain } from 'viem'
 
 export const robinhood = defineChain({
   id: 4663,

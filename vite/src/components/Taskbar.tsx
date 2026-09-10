@@ -1,6 +1,6 @@
 interface TaskbarProps {
   windows: Record<string, boolean>
-  onToggle: (name: string) => void
+  onToggle: (name: string) => void // Change from keyof typeof windows to string
 }
 
 export default function Taskbar({ windows, onToggle }: TaskbarProps) {
