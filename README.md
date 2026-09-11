@@ -123,7 +123,7 @@ Properties: No mint, pause, blacklist, transfer tax, or owner, liquidity is lock
 #### Vault Shares
 Standard: ERC-4626 tokenized vault
 
-Underlying Asset: USDC or USDT on Ethereum
+Underlying Asset: USDG on Ethereum
 
 Chain: Ethereum (1)
 
@@ -150,8 +150,13 @@ Recipient: Treasury address (mutable)
 Rationale: Aligns protocol incentives with user success — no revenue unless users earn
 
 ### Smart Contracts
+#### LJB token (Robinhood)
+Address: 0xF0C81b03A33463272a5466AfAeD628989A030F82
+Chain: Robinhood (4663)
+Standard: ERC-20
+
 #### EthYieldVault (Ethereum)
-Address: TBD
+Address: 0xc30058704D917e050d84999bd93a16a2e7C1B893
 Chain: Ethereum Mainnet (1)
 Standard: ERC-4626
 
@@ -184,7 +189,7 @@ Operator role (separate from admin)
 Whitelisted routers only
 
 #### BotStrategyRegistry (BOT Chain)
-Address: TBD
+Address: 0xc30058704D917e050d84999bd93a16a2e7C1B893
 Chain: BOT Chain (677)
 Purpose: Store current strategy configuration
 
@@ -207,7 +212,7 @@ Monotonic versioning (increments on every change)
 Emits StrategyUpdated event on every change
 
 #### BotYieldPass (BOT Chain)
-Address: TBD
+Address: 0x2dD67797F0c9Db63500992819827aBC2E3932A22
 Chain: BOT Chain (677)
 Standard: ERC-1155 (non-transferable)
 
@@ -236,7 +241,7 @@ Eligibility for reward campaigns
 Reputation/gamification layer
 
 #### BotRewardClaims (BOT Chain)
-Address: TBD
+Address: 0xF8296c312e5E349184988Dd8C8e87Dc05e65FCa8
 Chain: BOT Chain (677)
 Purpose: Distribute rewards with protocol fee
 
@@ -270,7 +275,7 @@ Unique claim IDs (no double-claiming)
 Relayer-only claims (prevents user front-running)
 
 #### RobinhoodDepositAdapter (Robinhood Chain)
-Address: TBD
+Address: 0x682227b257ab429f69B70655F5eFf0816665E6A1
 Chain: Robinhood Chain (4663)
 Purpose: Accept LJB deposits, swap to stable, emit bridge request
 

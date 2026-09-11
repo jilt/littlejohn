@@ -4,11 +4,13 @@ pragma solidity 0.8.28;
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/utils/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 
 contract BotRewardClaims is Ownable, Pausable, ReentrancyGuard {
     uint256 public constant MAX_FEE_BPS = 1000;
     uint256 public feeBps;
     address public treasury;
+    IERC20 public rewardToken;
 
     struct Claim {
         uint256 amount;
@@ -26,6 +28,7 @@ contract BotRewardClaims is Ownable, Pausable, ReentrancyGuard {
     error NotRelayer();
     error FeeExceedsCap();
     error ZeroAmount();
+    error ZeroAddress();
 
     event RewardsClaimed(
         uint256 indexed claimId,
@@ -37,18 +40,24 @@ contract BotRewardClaims is Ownable, Pausable, ReentrancyGuard {
     );
     event RewardsDeposited(address indexed depositor, uint256 amount);
     event TreasuryChanged(address indexed oldTreasury, address indexed newTreasury);
+    event RewardTokenChanged(address indexed oldToken, address indexed newToken);
 
-    constructor(uint256 _feeBps, address _treasury) Ownable(msg.sender) {
+    constructor(uint256 _feeBps, address _treasury, address _rewardToken) Ownable(msg.sender) {
         if (_feeBps > MAX_FEE_BPS) revert FeeExceedsCap();
-        if (_treasury == address(0)) revert ZeroAmount();
+        if (_treasury == address(0)) revert ZeroAddress();
+        if (_rewardToken == address(0)) revert ZeroAddress();
+        
         feeBps = _feeBps;
         treasury = _treasury;
+        rewardToken = IERC20(_rewardToken);
     }
 
-    function depositRewards() external payable {
-        if (msg.value == 0) revert ZeroAmount();
-        totalRewards += msg.value;
-        emit RewardsDeposited(msg.sender, msg.value);
+    function depositRewards(uint256 amount) external {
+        if (amount == 0) revert ZeroAmount();
+        
+        rewardToken.transferFrom(msg.sender, address(this), amount);
+        totalRewards += amount;
+        emit RewardsDeposited(msg.sender, amount);
     }
 
     function claimRewards(address user, uint256 grossAmount, uint256 claimId)
@@ -68,8 +77,8 @@ contract BotRewardClaims is Ownable, Pausable, ReentrancyGuard {
         balances[user] += netAmount;
         totalRewards -= grossAmount;
 
-        (bool success,) = treasury.call{value: feeAmount}("");
-        require(success, "Treasury transfer failed");
+        rewardToken.transfer(treasury, feeAmount);
+        rewardToken.transfer(user, netAmount);
 
         emit RewardsClaimed(claimId, user, grossAmount, feeAmount, netAmount, block.timestamp);
     }
@@ -80,9 +89,15 @@ contract BotRewardClaims is Ownable, Pausable, ReentrancyGuard {
     }
 
     function setTreasury(address _treasury) external onlyOwner {
-        if (_treasury == address(0)) revert ZeroAmount();
+        if (_treasury == address(0)) revert ZeroAddress();
         emit TreasuryChanged(treasury, _treasury);
         treasury = _treasury;
+    }
+
+    function setRewardToken(address _rewardToken) external onlyOwner {
+        if (_rewardToken == address(0)) revert ZeroAddress();
+        emit RewardTokenChanged(address(rewardToken), _rewardToken);
+        rewardToken = IERC20(_rewardToken);
     }
 
     function pause() external onlyOwner {

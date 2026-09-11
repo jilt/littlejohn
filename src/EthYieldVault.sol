@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {IERC20, IERC20Metadata, ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/token/ERC20/extensions/IERC20Metadata.sol";
+import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
+import {ERC4626} from "@openzeppelin/token/ERC20/extensions/ERC4626.sol";
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/utils/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/utils/Pausable.sol";
@@ -22,12 +25,7 @@ interface IKyberFarm {
     function earned(uint256 tokenId) external view returns (uint256);
 }
 
-interface IERC4626 {
-    function asset() external view returns (address);
-    function totalAssets() external view returns (uint256);
-}
-
-contract EthYieldVault is ERC20, Ownable, ReentrancyGuard, Pausable {
+contract EthYieldVault is ERC4626, Ownable, ReentrancyGuard, Pausable {
     uint256 public constant MAX_SLIPPAGE_BPS = 500;
 
     struct Strategy {
@@ -61,10 +59,13 @@ contract EthYieldVault is ERC20, Ownable, ReentrancyGuard, Pausable {
 
     constructor(IERC20 _underlyingAsset, string memory _name, string memory _symbol)
         ERC20(_name, _symbol)
+        ERC4626(_underlyingAsset)   // ← stores the USDG address forever (fixes Problem 1)
         Ownable(msg.sender)
     {
         operator = msg.sender;
     }
+
+    // ─── Admin ───────────────────────────────────────────────
 
     function setStrategy(
         uint256 _ethChainId,
@@ -87,7 +88,7 @@ contract EthYieldVault is ERC20, Ownable, ReentrancyGuard, Pausable {
             description: _description
         });
 
-        emit StrategySet(_ethChainId, _pool, _farm, _slippage, _description);
+        emit StrategySet(strategy.version, _pool, _farm, _slippage, _description);
     }
 
     function setOperator(address _operator) external onlyOwner {
@@ -100,6 +101,37 @@ contract EthYieldVault is ERC20, Ownable, ReentrancyGuard, Pausable {
         whitelistedRouters[_router] = _status;
         emit RouterWhitelisted(_router, _status);
     }
+
+    function pause() external onlyOwner { _pause(); }
+    function unpause() external onlyOwner { _unpause(); }
+
+    // ─── Deposits & Withdrawals (working versions, fixes Problem 3) ──
+
+    function deposit(uint256 assets, address receiver)
+        public override nonReentrant whenNotPaused returns (uint256)
+    {
+        return super.deposit(assets, receiver);
+    }
+
+    function mint(uint256 shares, address receiver)
+        public override nonReentrant whenNotPaused returns (uint256)
+    {
+        return super.mint(shares, receiver);
+    }
+
+    function withdraw(uint256 assets, address receiver, address owner)
+        public override nonReentrant returns (uint256)
+    {
+        return super.withdraw(assets, receiver, owner);
+    }
+
+    function redeem(uint256 shares, address receiver, address owner)
+        public override nonReentrant returns (uint256)
+    {
+        return super.redeem(shares, receiver, owner);
+    }
+
+    // ─── Strategy operations ─────────────────────────────────
 
     function operatorZapIn(address router, bytes calldata calldata_, uint256 deadline)
         external
@@ -143,25 +175,5 @@ contract EthYieldVault is ERC20, Ownable, ReentrancyGuard, Pausable {
     function _lastPositionTokenId() internal view returns (uint256) {
         if (strategy.pool == address(0)) return 0;
         return IPositionManager(strategy.pool).balanceOf(address(this));
-    }
-
-    function totalAssets() public view returns (uint256) {
-        return balanceOf(address(this));
-    }
-
-    function deposit(uint256 assets, address receiver) external returns (uint256 shares) {
-        return 0;
-    }
-
-    function mint(uint256 shares, address receiver) external returns (uint256 assets) {
-        return 0;
-    }
-
-    function redeem(uint256 shares, address receiver, address owner) external returns (uint256 assets) {
-        return 0;
-    }
-
-    function withdraw(uint256 assets, address receiver, address owner) external returns (uint256 shares) {
-        return 0;
     }
 }
