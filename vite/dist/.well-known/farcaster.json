@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "REPLACE_WITH_HEADER_FROM_MANIFEST_TOOL",
+    "payload": "REPLACE_WITH_PAYLOAD_FROM_MANIFEST_TOOL",
+    "signature": "REPLACE_WITH_SIGNATURE_FROM_MANIFEST_TOOL"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Little John Bot",
+    "homeUrl": "https://yourdomain.xyz",
+    "iconUrl": "https://yourdomain.xyz/icon.png",
+    "splashImageUrl": "https://yourdomain.xyz/splash.png",
+    "splashBackgroundColor": "#008080",
+    "description": "Interchain stablecoin vault with BOT Chain orchestration",
+    "requiredChains": ["eip155:4663", "eip155:1", "eip155:677"]
+  }
+}

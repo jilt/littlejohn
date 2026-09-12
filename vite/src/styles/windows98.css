@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   background: #191C28;
   color: #FFFFFF;
   overflow-y: auto;
@@ -42,8 +44,12 @@ body {
   background: linear-gradient(90deg, #191C28, #2d3248);
   color: #FFFFFF;
   border-bottom: 2px solid #C6FE00;
-  padding: 4px 8px;
-  font-weight: bold;
+  padding: 6px 10px;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.03em;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -55,11 +61,13 @@ body {
   color: #C6FE00;
   width: 20px;
   height: 20px;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 16px;
   text-align: center;
   cursor: pointer;
-  font-family: sans-serif;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  padding: 0;
 }
 
 .window-close:hover {
@@ -81,11 +89,14 @@ body {
   background: #2d3248;
   border: 2px solid #C6FE00;
   color: #FFFFFF;
-  padding: 6px 16px;
-  font-family: inherit;
+  padding: 8px 16px;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.02em;
   cursor: pointer;
   box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
-  font-weight: bold;
 }
 
 .btn:hover {
@@ -114,8 +125,9 @@ body {
   background: #191C28;
   border: 2px solid #C6FE00;
   color: #FFFFFF;
-  padding: 4px 8px;
-  font-family: inherit;
+  padding: 6px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
   width: 100%;
 }
 
@@ -148,12 +160,15 @@ body {
 }
 
 .navbar-title {
-  font-weight: bold;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   display: flex;
   align-items: center;
   gap: 8px;
   color: #C6FE00;
-  font-size: 18px;
+  font-size: 16px;
   white-space: nowrap;
 }
 
@@ -171,13 +186,17 @@ body {
 }
 
 .nav-address {
-  font-family: monospace;
+  font-family: 'JetBrains Mono', monospace;
   color: #FFFFFF;
+  font-size: 12px;
 }
 
 .nav-network {
   color: #C6FE00;
-  font-weight: bold;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 12px;
 }
 
 .nav-btn {
@@ -185,9 +204,11 @@ body {
   border: 2px solid #C6FE00;
   color: #191C28;
   padding: 6px 16px;
-  font-weight: bold;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 12px;
   cursor: pointer;
-  font-family: inherit;
   box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
 }
 
@@ -197,7 +218,8 @@ body {
 }
 
 .navbar-time {
-  font-size: 12px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
   color: #FFFFFF;
 }
 
@@ -221,7 +243,10 @@ body {
   border: 2px solid #C6FE00;
   color: #C6FE00;
   padding: 4px 12px;
-  font-weight: bold;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -245,7 +270,9 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: bold;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
 }
 
 .taskbar-item:hover {
@@ -262,7 +289,8 @@ body {
 .status-bar {
   border-top: 1px solid #C6FE00;
   padding: 4px 8px;
-  font-size: 12px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
   color: #C6FE00;
   margin-top: 12px;
   background: #343B52;
@@ -314,13 +342,20 @@ body {
 
 .stat-value {
   color: #C6FE00;
-  font-size: 24px;
-  font-weight: bold;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  font-size: 20px;
+  line-height: 1.2;
 }
 
 .stat-label {
   color: #fff;
-  font-weight: bold;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
 }
 
 /* Responsive - Tablet */
@@ -342,7 +377,7 @@ body {
   }
   
   .navbar-title {
-    font-size: 14px;
+    font-size: 13px;
     gap: 4px;
   }
   
@@ -360,11 +395,11 @@ body {
   
   .nav-btn {
     padding: 4px 10px;
-    font-size: 12px;
+    font-size: 10px;
   }
   
   .navbar-time {
-    font-size: 10px;
+    font-size: 9px;
   }
   
   .taskbar {
@@ -374,12 +409,12 @@ body {
   
   .taskbar-start {
     padding: 2px 8px;
-    font-size: 12px;
+    font-size: 10px;
   }
   
   .taskbar-item {
     padding: 2px 6px;
-    font-size: 11px;
+    font-size: 10px;
     max-width: 80px;
   }
   
@@ -391,6 +426,10 @@ body {
   .window {
     max-width: 100%;
     border-width: 1px;
+  }
+  
+  .window-header {
+    font-size: 11px;
   }
   
   .window-content {
@@ -426,7 +465,7 @@ body {
   }
   
   .stat-value {
-    font-size: 20px;
+    font-size: 16px;
   }
 }
 
@@ -437,7 +476,7 @@ body {
   }
   
   .navbar-title {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .nav-address {
@@ -446,12 +485,12 @@ body {
   
   .nav-btn {
     padding: 3px 8px;
-    font-size: 11px;
+    font-size: 9px;
   }
   
   .taskbar-item {
     max-width: 60px;
-    font-size: 10px;
+    font-size: 9px;
   }
   
   .landing-stats {
@@ -463,6 +502,6 @@ body {
   }
   
   .stat-value {
-    font-size: 18px;
+    font-size: 14px;
   }
 }

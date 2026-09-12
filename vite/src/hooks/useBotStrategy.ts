@@ -3,8 +3,10 @@ import { botchain } from '../chains'
 import { CONTRACTS } from '../config/contracts'
 
 export function useBotStrategy() {
+  const zeroAddr = '0x000000000000000000000000000000000000' as `0x${string}`
+  const readAddress = (CONTRACTS.botChain.botStrategyRegistry || zeroAddr) as `0x${string}`
   const { data: strategy, isLoading, error } = useReadContract({
-    address: CONTRACTS.botChain.botStrategyRegistry,
+    address: readAddress,
     abi: [{
       name: 'strategy',
       type: 'function',

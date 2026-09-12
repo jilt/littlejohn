@@ -5,8 +5,10 @@ import { CONTRACTS } from '../config/contracts'
 
 export default function PassesPanel() {
   const { address } = useAccount()
+  const zeroAddr = '0x00000000000000000000000000000000000000' as `0x${string}`
+  const readAddress = (address || zeroAddr) as `0x${string}`
   const { data: balanceDepositor, isLoading: isLoadingDepositor } = useReadContract({
-    address: CONTRACTS.botChain.botYieldPass,
+    address: CONTRACTS.botChain.botYieldPass as `0x${string}`,
     abi: [{
       name: 'balanceOf',
       type: 'function',
@@ -18,13 +20,13 @@ export default function PassesPanel() {
       outputs: [{ name: 'balance', type: 'uint256' }]
     }],
     functionName: 'balanceOf',
-    args: [address || '0x00000000000000000000000000000000000000', 1n],
+    args: [readAddress, 1n],
     chainId: botchain.id,
     query: { enabled: !!address }
   })
 
   const { data: balanceLocked30d, isLoading: isLoadingLocked30d } = useReadContract({
-    address: CONTRACTS.botChain.botYieldPass,
+    address: CONTRACTS.botChain.botYieldPass as `0x${string}`,
     abi: [{
       name: 'balanceOf',
       type: 'function',
@@ -36,13 +38,13 @@ export default function PassesPanel() {
       outputs: [{ name: 'balance', type: 'uint256' }]
     }],
     functionName: 'balanceOf',
-    args: [address || '0x00000000000000000000000000000000000000', 2n],
+    args: [readAddress, 2n],
     chainId: botchain.id,
     query: { enabled: !!address }
   })
 
   const { data: balanceLocked90d, isLoading: isLoadingLocked90d } = useReadContract({
-    address: CONTRACTS.botChain.botYieldPass,
+    address: CONTRACTS.botChain.botYieldPass as `0x${string}`,
     abi: [{
       name: 'balanceOf',
       type: 'function',
@@ -54,7 +56,7 @@ export default function PassesPanel() {
       outputs: [{ name: 'balance', type: 'uint256' }]
     }],
     functionName: 'balanceOf',
-    args: [address || '0x00000000000000000000000000000000000000', 3n],
+    args: [readAddress, 3n],
     chainId: botchain.id,
     query: { enabled: !!address }
   })

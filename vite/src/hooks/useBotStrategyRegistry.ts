@@ -1,11 +1,12 @@
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useReadContract, useWriteContract } from 'wagmi'
 import { botchain } from '../chains'
 import { CONTRACTS } from '../config/contracts'
-import type { BotStrategyRegistry } from '../types/contracts'
 
 export function useBotStrategyRegistry() {
+  const zeroAddr = '0x000000000000000000000000000000000000' as `0x${string}`
+  const readAddress = (CONTRACTS.botChain.botStrategyRegistry || zeroAddr) as `0x${string}`
   const { data: strategy, isLoading, error } = useReadContract({
-    address: CONTRACTS.botChain.botStrategyRegistry,
+    address: readAddress,
     abi: [{
       name: 'strategy',
       type: 'function',
@@ -36,7 +37,7 @@ export function useBotStrategyRegistry() {
     description: string
   }) => {
     writeContract({
-      address: CONTRACTS.botChain.botStrategyRegistry,
+      address: readAddress,
       abi: [{
         name: 'setStrategy',
         type: 'function',
@@ -52,7 +53,7 @@ export function useBotStrategyRegistry() {
         outputs: []
       }],
       functionName: 'setStrategy',
-      args: [params.ethChainId, params.ethVault, params.pool, params.farm, params.slippage, params.description],
+      args: [params.ethChainId, params.ethVault as `0x${string}`, params.pool as `0x${string}`, params.farm as `0x${string}`, params.slippage, params.description],
       chainId: botchain.id
     })
   }
