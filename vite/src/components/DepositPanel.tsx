@@ -24,7 +24,7 @@ export default function DepositPanel() {
       {tab === 'deposit' ? (
         <div>
           <p>Deposit LJB tokens (Robinhood Chain)</p>
-          <p style={{ fontSize: '12px', color: '#808080' }}>
+          <p style={{ fontSize: '12px', color: '#FFFFFF', opacity: 0.7 }}>
             LJB → stables → Ethereum vault → LP + farm
           </p>
           

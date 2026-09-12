@@ -1,11 +1,10 @@
 import { useReadContract } from 'wagmi'
 import { botchain } from '../chains'
-
-const BOT_STRATEGY_REGISTRY_ADDRESS = '0x0000000000000000000000000000000000000000' // Update after deployment
+import { CONTRACTS } from '../config/contracts'
 
 export function useBotStrategy() {
   const { data: strategy, isLoading, error } = useReadContract({
-    address: BOT_STRATEGY_REGISTRY_ADDRESS,
+    address: CONTRACTS.botChain.botStrategyRegistry,
     abi: [{
       name: 'strategy',
       type: 'function',

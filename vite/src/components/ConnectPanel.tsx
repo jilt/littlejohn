@@ -22,12 +22,12 @@ export default function ConnectPanel() {
     <div>
       <div className="panel">
         <strong>Address:</strong><br />
-        {address?.slice(0, 6)}...{address?.slice(-4)}
+        <span style={{ fontFamily: 'monospace' }}>{address?.slice(0, 6)}...{address?.slice(-4)}</span>
       </div>
       
       <div className="panel">
         <strong>Network:</strong><br />
-        {chain?.name || 'Unknown'}
+        <span>{chain?.name || 'Unknown'}</span>
       </div>
       
       <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -42,12 +42,8 @@ export default function ConnectPanel() {
         </button>
       </div>
       
-      <button 
-        className="btn" 
-        onClick={() => disconnect()} 
-        style={{ marginTop: '12px' }}
-    >
-  Disconnect
+      <button className="btn" onClick={() => disconnect()} style={{ marginTop: '12px' }}>
+        Disconnect
       </button>
     </div>
   )
