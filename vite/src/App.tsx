@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { sdk } from '@farcaster/miniapp-sdk'
+import { initSDK } from './connector'
 import NavBar from './components/NavBar'
 import Taskbar from './components/Taskbar'
 import LandingPanel from './components/LandingPanel'
@@ -19,7 +19,7 @@ function App() {
   })
 
   useEffect(() => {
-    sdk.actions.ready().catch(console.error)
+    initSDK().catch(console.error)
   }, [])
 
   const toggleWindow = (name: keyof typeof windows) => {

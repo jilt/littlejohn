@@ -1,5 +1,5 @@
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
+import { injectedConnector, farcasterConnector, initSDK } from '../connector'
 
 export default function NavBar() {
   const { address, isConnected, chain } = useAccount()
@@ -7,6 +7,15 @@ export default function NavBar() {
   const { disconnect } = useDisconnect()
   const now = new Date()
   const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+
+  const handleConnectInjected = async () => {
+    connect({ connector: injectedConnector })
+  }
+
+  const handleConnectFarcaster = async () => {
+    await initSDK()
+    connect({ connector: farcasterConnector })
+  }
 
   return (
     <div className="navbar">
@@ -22,9 +31,14 @@ export default function NavBar() {
             <button className="nav-btn" onClick={() => disconnect()}>Disconnect</button>
           </div>
         ) : (
-          <button className="nav-btn" onClick={() => connect({ connector: farcasterMiniApp() })}>
-            Connect Wallet
-          </button>
+          <div className="nav-connect-group">
+            <button className="nav-btn" onClick={handleConnectInjected}>
+              Connect Wallet
+            </button>
+            <button className="nav-btn" onClick={handleConnectFarcaster}>
+              Farcaster
+            </button>
+          </div>
         )}
         <div className="navbar-time">{time}</div>
       </div>

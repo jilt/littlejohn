@@ -1,12 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createConfig, WagmiProvider } from 'wagmi'
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 import { http } from 'viem'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './styles/windows98.css'
 import { robinhood, ethereum, botchain } from './chains'
+import { injectedConnector, farcasterConnector } from './connector'
 
 const config = createConfig({
   chains: [robinhood, ethereum, botchain],
@@ -15,14 +15,14 @@ const config = createConfig({
     [ethereum.id]: http(),
     [botchain.id]: http()
   },
-  connectors: [farcasterMiniApp()]
+  connectors: [injectedConnector, farcasterConnector]
 })
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5_000, // 5 seconds
-      gcTime: 30_000, // 30 seconds (formerly cacheTime)
+      staleTime: 5_000,
+      gcTime: 30_000,
     },
   },
 })

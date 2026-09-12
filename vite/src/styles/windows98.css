@@ -217,6 +217,12 @@ body {
   border-color: #FFFFFF;
 }
 
+.nav-connect-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .navbar-time {
   font-size: 11px;
   font-family: 'JetBrains Mono', monospace;
@@ -326,9 +332,29 @@ body {
   gap: 16px;
 }
 
+.landing-header {
+  text-align: center;
+  margin-bottom: 12px;
+  padding-bottom: 16px;
+}
+
+.landing-title {
+  color: #C6FE00;
+  font-size: 28px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.landing-subtitle {
+  color: #FFFFFF;
+  font-size: 20px;
+  margin-bottom: 0;
+  font-style: italic;
+}
+
 .landing-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 8px;
 }
@@ -494,7 +520,8 @@ body {
   }
   
   .landing-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
   
   .stat-card {
