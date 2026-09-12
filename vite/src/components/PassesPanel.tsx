@@ -5,7 +5,7 @@ import { CONTRACTS } from '../config/contracts'
 
 export default function PassesPanel() {
   const { address } = useAccount()
-  const zeroAddr = '0x00000000000000000000000000000000000000' as `0x${string}`
+  const zeroAddr = '0x000000000000000000000000000000000000' as `0x${string}`
   const readAddress = (address || zeroAddr) as `0x${string}`
   const { data: balanceDepositor, isLoading: isLoadingDepositor } = useReadContract({
     address: CONTRACTS.botChain.botYieldPass as `0x${string}`,

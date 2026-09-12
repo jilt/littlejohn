@@ -3,8 +3,6 @@ import { initSDK } from './connector'
 import NavBar from './components/NavBar'
 import Taskbar from './components/Taskbar'
 import LandingPanel from './components/LandingPanel'
-import StrategyPanel from './components/StrategyPanel'
-import PassesPanel from './components/PassesPanel'
 import RewardsPanel from './components/RewardsPanel'
 import DepositPanel from './components/DepositPanel'
 import Window98 from './components/Window98'
@@ -12,8 +10,6 @@ import Window98 from './components/Window98'
 function App() {
   const [windows, setWindows] = useState({
     landing: true,
-    strategy: true,
-    passes: true,
     rewards: true,
     deposit: true
   })
@@ -37,19 +33,7 @@ function App() {
           </Window98>
         )}
         
-        {windows.strategy && (
-          <Window98 title="Strategy" onClose={() => toggleWindow('strategy')}>
-            <StrategyPanel />
-          </Window98>
-        )}
-        
-        {windows.passes && (
-          <Window98 title="Your Passes" onClose={() => toggleWindow('passes')}>
-            <PassesPanel />
-          </Window98>
-        )}
-        
-        {windows.rewards && (
+                {windows.rewards && (
           <Window98 title="Rewards" onClose={() => toggleWindow('rewards')}>
             <RewardsPanel />
           </Window98>

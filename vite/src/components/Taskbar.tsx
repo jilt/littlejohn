@@ -1,6 +1,6 @@
 interface TaskbarProps {
   windows: Record<string, boolean>
-  onToggle: (name: "landing" | "strategy" | "deposit" | "passes" | "rewards") => void
+  onToggle: (name: "landing" | "deposit" | "rewards") => void
 }
 
 export default function Taskbar({ windows, onToggle }: TaskbarProps) {
@@ -14,7 +14,7 @@ export default function Taskbar({ windows, onToggle }: TaskbarProps) {
   <button
     key={name}
     className={`taskbar-item ${isOpen ? 'active' : ''}`}
-    onClick={() => onToggle(name as "landing" | "strategy" | "deposit" | "passes" | "rewards")}
+    onClick={() => onToggle(name as "landing" | "deposit" | "rewards")}
   >
     {name.charAt(0).toUpperCase() + name.slice(1)}
   </button>

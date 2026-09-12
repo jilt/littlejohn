@@ -1,46 +1,5 @@
 // Contract interfaces generated from ABIs
 
-// BotStrategyRegistry interface
-export interface BotStrategyRegistry {
-  functions: {
-    strategy: (
-      parameters: Record<PropertyKey, never>
-    ) => Promise<[
-      ethChainId: bigint,
-      ethVault: string,
-      pool: string,
-      farm: string,
-      slippage: bigint,
-      version: bigint,
-      description: string
-    ]>
-    setStrategy: (
-      parameters: {
-        ethChainId: bigint
-        ethVault: string
-        pool: string
-        farm: string
-        slippage: bigint
-        description: string
-      }
-    ) => Promise<void>
-  }
-  events: {
-    StrategyUpdated: (
-      parameters: {
-        version: bigint
-        ethChainId: bigint
-        ethVault: string
-        pool: string
-        farm: string
-        slippage: bigint
-        description: string
-        role: `0x${string}`
-      }
-    ) => void
-  }
-}
-
 // BotYieldPass interface (ERC1155)
 export interface BotYieldPass {
   functions: {

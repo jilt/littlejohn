@@ -223,6 +223,27 @@ body {
   align-items: center;
 }
 
+.nav-passes {
+  color: #C6FE00;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid #C6FE00;
+  border-radius: 4px;
+}
+
+.nav-menu-btn {
+  background: transparent;
+  border: 2px solid #C6FE00;
+  color: #C6FE00;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 2px 8px;
+  display: none;
+}
+
 .navbar-time {
   font-size: 11px;
   font-family: 'JetBrains Mono', monospace;
@@ -409,6 +430,7 @@ body {
   
   .navbar-right {
     gap: 8px;
+    position: relative;
   }
   
   .nav-address {
@@ -419,13 +441,43 @@ body {
     display: none;
   }
   
+  .nav-menu-btn {
+    display: block;
+  }
+  
+  .nav-connect-group,
+  .nav-wallet-info {
+    display: none;
+  }
+  
+  .navbar.menu-open .nav-connect-group,
+  .navbar.menu-open .nav-wallet-info {
+    display: flex;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: #191C28;
+    border: 2px solid #C6FE00;
+    border-radius: 8px;
+    padding: 12px;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+    min-width: 200px;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+  }
+  
   .nav-btn {
     padding: 4px 10px;
     font-size: 10px;
   }
   
+  .nav-passes {
+    display: inline-block;
+  }
+  
   .navbar-time {
-    font-size: 9px;
+    display: none;
   }
   
   .taskbar {
@@ -513,7 +565,11 @@ body {
     padding: 3px 8px;
     font-size: 9px;
   }
-  
+
+  .nav-passes {
+    display: none;
+  }
+
   .taskbar-item {
     max-width: 60px;
     font-size: 9px;

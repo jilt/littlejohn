@@ -1,36 +1,3 @@
-// BotStrategyRegistry contract configuration
-export const BOT_STRATEGY_REGISTRY_CONFIG = {
-  address: '0xc30058704D917e050d84999bd93a16a2e7C1B893',
-  chainId: 677, // BOT Chain
-  blockExplorer: 'https://scan.botchain.ai',
-  functions: {
-    strategy: {
-      name: 'strategy',
-      inputs: [],
-      outputs: [
-        { name: 'ethChainId', type: 'uint256' },
-        { name: 'ethVault', type: 'address' },
-        { name: 'pool', type: 'address' },
-        { name: 'farm', type: 'address' },
-        { name: 'slippage', type: 'uint256' },
-        { name: 'version', type: 'uint256' },
-        { name: 'description', type: 'string' }
-      ]
-    },
-    setStrategy: {
-      name: 'setStrategy',
-      inputs: [
-        { name: '_ethChainId', type: 'uint256' },
-        { name: '_ethVault', type: 'address' },
-        { name: '_pool', type: 'address' },
-        { name: '_farm', type: 'address' },
-        { name: '_slippage', type: 'uint256' },
-        { name: '_description', type: 'string' }
-      ]
-    }
-  }
-}
-
 // BotYieldPass contract configuration
 export const BOT_YIELD_PASS_CONFIG = {
   address: '0x2dD67797F0c9Db63500992819827aBC2E3932A22',
