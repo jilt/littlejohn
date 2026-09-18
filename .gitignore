@@ -5,6 +5,9 @@ lib/
 broadcast/
 vite/node_modules/
 .opencode/
+.agents/
+AGENTS.md
+FAILEDTEST_UI.md
 TODO.md
 TODO_BLOCKED.md
 PseudoCode.md
