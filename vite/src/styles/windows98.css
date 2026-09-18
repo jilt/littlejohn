@@ -14,20 +14,20 @@ body {
 }
 
 .desktop {
-  width: 100%;
-  min-height: 100vh;
-  position: relative;
-  background: #191C28;
+   width: 100%;
+   min-height: 100vh;
+   overflow-y: auto;
+   padding-bottom: 40px;
+   position: relative;
+   background: #191C28;
 }
 
 .desktop-icons {
-  padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 20px;
-  overflow-y: auto;
-  background: #191C28;
-  align-content: start;
+   padding: 20px;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+   gap: 20px;
+   background: #191C28;
 }
 
 /* Window 98 Styles */
