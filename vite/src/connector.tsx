@@ -98,6 +98,10 @@ export async function getContractBalance(params: { address: string; abi: any; fu
   })
 }
 
+export async function getBalance(address: `0x${string}`): Promise<bigint> {
+  return await PUBLIC_CLIENT.getBalance({ address })
+}
+
 export async function sendContractTransaction(params: {
   account: string
   address: string

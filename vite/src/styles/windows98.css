@@ -588,3 +588,12 @@ body {
     font-size: 14px;
   }
 }
+
+/* Accordion styles */
+.accordion-panel {
+  background: #191C28;
+  border: 2px solid #C6FE00;
+  padding: 8px 12px;
+  margin: 8px 0;
+  color: #FFFFFF;
+}

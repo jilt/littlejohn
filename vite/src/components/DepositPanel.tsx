@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import GetLjbTokens from './GetLjbTokens'
 
 export default function DepositPanel() {
   const [amount, setAmount] = useState('')
@@ -28,13 +29,15 @@ export default function DepositPanel() {
             LJB → stables → Ethereum vault → LP + farm
           </p>
           
+          <GetLjbTokens />
+          
           <input
             type="text"
             className="input"
             placeholder="Amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            style={{ marginBottom: '12px' }}
+            style={{ marginTop: '12px', marginBottom: '12px' }}
           />
           
           <button className="btn btn-primary" style={{ width: '100%' }}>
