@@ -1,3 +1,5 @@
+import { ETH_YIELD_VAULT_ABI } from './ethYieldVaultABI'
+
 // BotYieldPass contract configuration
 export const BOT_YIELD_PASS_CONFIG = {
   address: '0x2dD67797F0c9Db63500992819827aBC2E3932A22',
@@ -59,6 +61,7 @@ export const ETH_YIELD_VAULT_CONFIG = {
   address: '0xc30058704D917e050d84999bd93a16a2e7C1B893',
   chainId: 1, // Ethereum Mainnet
   blockExplorer: 'https://etherscan.io',
+  abi: ETH_YIELD_VAULT_ABI,
   functions: {
     deposit: {
       name: 'deposit',

@@ -1,9 +1,10 @@
 # Compiler files
 cache/
-out/
 lib/
 broadcast/
 vite/node_modules/
+vite/.env
+vite/dist/
 .opencode/
 .agents/
 AGENTS.md

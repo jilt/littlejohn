@@ -87,7 +87,40 @@ export interface BotRewardClaims {
 // EthYieldVault interface
 export interface EthYieldVault {
   functions: {
-    // Add functions based on deployment script
+    balanceOf: (params: { account: string }) => Promise<bigint>
+    totalAssets: () => Promise<bigint>
+    deposit: (params: { assets: bigint; receiver: string }) => Promise<void>
+    withdraw: (params: { assets: bigint; receiver: string; owner: string }) => Promise<void>
+    mint: (params: { shares: bigint; receiver: string }) => Promise<void>
+    redeem: (params: { shares: bigint; receiver: string; owner: string }) => Promise<void>
+    harvest: (params: { tokenId: bigint }) => Promise<void>
+    stakeIntoFarm: (params: { tokenId: bigint }) => Promise<void>
+    withdrawFromFarm: (params: { tokenId: bigint }) => Promise<void>
+    previewDeposit: (params: { assets: bigint }) => Promise<bigint>
+    previewMint: (params: { shares: bigint }) => Promise<bigint>
+    previewRedeem: (params: { shares: bigint }) => Promise<bigint>
+    previewWithdraw: (params: { assets: bigint }) => Promise<bigint>
+    convertToAssets: (params: { shares: bigint }) => Promise<bigint>
+    convertToShares: (params: { assets: bigint }) => Promise<bigint>
+    strategy: () => Promise<any>
+    owner: () => Promise<string>
+    paused: () => Promise<boolean>
+    asset: () => Promise<string>
+    name: () => Promise<string>
+    symbol: () => Promise<string>
+    decimals: () => Promise<number>
+    totalSupply: () => Promise<bigint>
+  }
+  events: {
+    Deposit: (params: { sender: string; owner: string; assets: bigint; shares: bigint }) => void
+    Withdraw: (params: { sender: string; receiver: string; owner: string; assets: bigint; shares: bigint }) => void
+    ZapIn: (params: { router: string; amount: bigint; tokenId: bigint }) => void
+    FarmDeposited: (params: { tokenId: bigint }) => void
+    FarmStaked: (params: { tokenId: bigint }) => void
+    FarmHarvested: (params: { tokenId: bigint; rewards: bigint }) => void
+    StrategySet: (params: { version: bigint; pool: string; farm: string; slippage: bigint; description: string }) => void
+    OperatorChanged: (params: { oldOperator: string; newOperator: string }) => void
+    RouterWhitelisted: (params: { router: string; status: boolean }) => void
   }
 }
 

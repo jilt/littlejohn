@@ -1,10 +1,16 @@
 import { createContext, useState, useCallback, useEffect } from 'react'
 import { createPublicClient, createWalletClient, http, custom } from 'viem'
 import { sdk } from '@farcaster/miniapp-sdk'
-import { robinhood } from './chains'
+import { robinhood, ethereum } from './chains'
+import { ETH_YIELD_VAULT_ABI, ETH_YIELD_VAULT_ADDRESS } from './config/ethYieldVaultABI'
 
 const PUBLIC_CLIENT = createPublicClient({
   chain: robinhood,
+  transport: http(),
+})
+
+const ETHEREUM_PUBLIC_CLIENT = createPublicClient({
+  chain: ethereum,
   transport: http(),
 })
 
@@ -110,6 +116,7 @@ export async function sendContractTransaction(params: {
   args: any[]
   value?: bigint
   gas?: bigint
+  chain?: any
 }) {
   const {
     account,
@@ -119,6 +126,7 @@ export async function sendContractTransaction(params: {
     args,
     value,
     gas,
+    chain = robinhood,
   } = params
 
   const client = getWalletClient(account)
@@ -131,7 +139,7 @@ export async function sendContractTransaction(params: {
     args,
     value,
     ...(gas !== undefined ? { gas } : {}),
-    chain: robinhood,
+    chain,
   })
 }
 
@@ -183,7 +191,218 @@ export async function sendRawTransaction(params: {
   })
 }
 
-export { PUBLIC_CLIENT, getWalletClient }
+// ─── EthYieldVault helpers ────────────────────────────────────
+
+export async function getVaultBalance(account: string) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'balanceOf',
+    args: [account as `0x${string}`],
+    chain: ethereum,
+  })
+}
+
+export async function getVaultTotalAssets() {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'totalAssets',
+    chain: ethereum,
+  })
+}
+
+export async function getVaultStrategy() {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'strategy',
+    chain: ethereum,
+  })
+}
+
+export async function getVaultShares(address: string) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'balanceOf',
+    args: [address as `0x${string}`],
+    chain: ethereum,
+  })
+}
+
+export async function vaultDeposit(params: {
+  account: string
+  assets: bigint
+  receiver: string
+}) {
+  const { account, assets, receiver } = params
+  return await sendContractTransaction({
+    account,
+    address: ETH_YIELD_VAULT_ADDRESS,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'deposit',
+    args: [assets, receiver as `0x${string}`],
+    chain: ethereum,
+  })
+}
+
+export async function vaultWithdraw(params: {
+  account: string
+  assets: bigint
+  receiver: string
+  owner: string
+}) {
+  const { account, assets, receiver, owner } = params
+  return await sendContractTransaction({
+    account,
+    address: ETH_YIELD_VAULT_ADDRESS,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'withdraw',
+    args: [assets, receiver as `0x${string}`, owner as `0x${string}`],
+    chain: ethereum,
+  })
+}
+
+export async function vaultMint(params: {
+  account: string
+  shares: bigint
+  receiver: string
+}) {
+  const { account, shares, receiver } = params
+  return await sendContractTransaction({
+    account,
+    address: ETH_YIELD_VAULT_ADDRESS,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'mint',
+    args: [shares, receiver as `0x${string}`],
+    chain: ethereum,
+  })
+}
+
+export async function vaultRedeem(params: {
+  account: string
+  shares: bigint
+  receiver: string
+  owner: string
+}) {
+  const { account, shares, receiver, owner } = params
+  return await sendContractTransaction({
+    account,
+    address: ETH_YIELD_VAULT_ADDRESS,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'redeem',
+    args: [shares, receiver as `0x${string}`, owner as `0x${string}`],
+    chain: ethereum,
+  })
+}
+
+export async function vaultHarvest(params: {
+  account: string
+  tokenId: bigint
+}) {
+  const { account, tokenId } = params
+  return await sendContractTransaction({
+    account,
+    address: ETH_YIELD_VAULT_ADDRESS,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'harvest',
+    args: [tokenId],
+    chain: ethereum,
+  })
+}
+
+export async function vaultStakeIntoFarm(params: {
+  account: string
+  tokenId: bigint
+}) {
+  const { account, tokenId } = params
+  return await sendContractTransaction({
+    account,
+    address: ETH_YIELD_VAULT_ADDRESS,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'stakeIntoFarm',
+    args: [tokenId],
+    chain: ethereum,
+  })
+}
+
+export async function vaultWithdrawFromFarm(params: {
+  account: string
+  tokenId: bigint
+}) {
+  const { account, tokenId } = params
+  return await sendContractTransaction({
+    account,
+    address: ETH_YIELD_VAULT_ADDRESS,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'withdrawFromFarm',
+    args: [tokenId],
+    chain: ethereum,
+  })
+}
+
+export async function vaultPreviewDeposit(assets: bigint) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'previewDeposit',
+    args: [assets],
+    chain: ethereum,
+  })
+}
+
+export async function vaultPreviewMint(shares: bigint) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'previewMint',
+    args: [shares],
+    chain: ethereum,
+  })
+}
+
+export async function vaultPreviewRedeem(shares: bigint) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'previewRedeem',
+    args: [shares],
+    chain: ethereum,
+  })
+}
+
+export async function vaultPreviewWithdraw(assets: bigint) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'previewWithdraw',
+    args: [assets],
+    chain: ethereum,
+  })
+}
+
+export async function vaultConvertToAssets(shares: bigint) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'convertToAssets',
+    args: [shares],
+    chain: ethereum,
+  })
+}
+
+export async function vaultConvertToShares(assets: bigint) {
+  return await ETHEREUM_PUBLIC_CLIENT.readContract({
+    address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
+    abi: ETH_YIELD_VAULT_ABI,
+    functionName: 'convertToShares',
+    args: [assets],
+    chain: ethereum,
+  })
+}
+
+export { PUBLIC_CLIENT, ETHEREUM_PUBLIC_CLIENT, getWalletClient }
 
 export async function initSDK() {
   try {
