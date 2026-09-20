@@ -14,7 +14,7 @@ interface TokenBalance {
 }
 
 export default function GetLjbTokens() {
-  const { address, isConnected } = useContext(WalletContext)
+  const {} = useContext(WalletContext)
   const [isOpen, setIsOpen] = useState(false)
   const [balances, setBalances] = useState<Record<string, TokenBalance>>({})
   const [selectedToken, setSelectedToken] = useState<'ETH' | 'USDG'>('ETH')
@@ -56,7 +56,7 @@ export default function GetLjbTokens() {
       ])
       setBalances({
         ETH: { symbol: 'ETH', address: tokenConfig.ETH.address, balance: ethBalance, decimals: 18 },
-        USDG: { symbol: 'USDG', address: tokenConfig.USDG.address, balance: BigInt(usdgBalance.toString() || '0'), decimals: 6 },
+        USDG: { symbol: 'USDG', address: tokenConfig.USDG.address, balance: BigInt((usdgBalance as bigint).toString() || '0'), decimals: 6 },
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch balances'
@@ -94,7 +94,7 @@ export default function GetLjbTokens() {
   const handleQuote = async () => {
     if (!amount || Number(amount) <= 0) return
     setError(null)
-    setButtonText('Quote')
+    setButtonText('Get Quote')
     try {
       const tokenIn = tokenConfig[selectedToken]
       const amountWei = BigInt(Math.floor(Number(amount) * Math.pow(10, tokenIn.decimals))).toString()
@@ -211,7 +211,7 @@ export default function GetLjbTokens() {
           <button
             className="btn btn-primary"
             style={{ width: '100%' }}
-            onClick={handleSwap}
+            onClick={quoteResult ? handleSwap : handleQuote}
             disabled={isSwapping}
           >
             {buttonText}

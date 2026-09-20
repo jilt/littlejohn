@@ -14,12 +14,12 @@ const ETHEREUM_PUBLIC_CLIENT = createPublicClient({
   transport: http(),
 })
 
-function getWalletClient(account?: string) {
+function getWalletClient(account?: string, chain?: any) {
   if (typeof window === 'undefined' || !(window as any).ethereum) {
     throw new Error('No Ethereum provider found')
   }
   return createWalletClient({
-    chain: robinhood,
+    chain: chain || robinhood,
     transport: custom((window as any).ethereum),
     ...(account ? { account: account as `0x${string}` } : {}),
   })
@@ -93,14 +93,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export async function getContractBalance(params: { address: string; abi: any; functionName: string; args: any[]; chain: any }) {
-  const { address, abi, functionName, args, chain } = params
-  return await PUBLIC_CLIENT.readContract({
+export async function getContractBalance(params: { address: string; abi: any; functionName: string; args: any[]; chain?: any }) {
+  const { address, abi, functionName, args, chain = robinhood } = params
+  const client = chain.id === ethereum.id ? ETHEREUM_PUBLIC_CLIENT : PUBLIC_CLIENT
+  return await client.readContract({
     address: address as `0x${string}`,
     abi,
     functionName,
     args,
-    chain,
   })
 }
 
@@ -129,7 +129,7 @@ export async function sendContractTransaction(params: {
     chain = robinhood,
   } = params
 
-  const client = getWalletClient(account)
+  const client = getWalletClient(account, chain)
 
   return client.writeContract({
     account: account as `0x${string}`,
@@ -138,8 +138,8 @@ export async function sendContractTransaction(params: {
     functionName,
     args,
     value,
-    ...(gas !== undefined ? { gas } : {}),
     chain,
+    ...(gas !== undefined ? { gas } : {}),
   })
 }
 
@@ -199,7 +199,6 @@ export async function getVaultBalance(account: string) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'balanceOf',
     args: [account as `0x${string}`],
-    chain: ethereum,
   })
 }
 
@@ -208,7 +207,6 @@ export async function getVaultTotalAssets() {
     address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'totalAssets',
-    chain: ethereum,
   })
 }
 
@@ -217,7 +215,6 @@ export async function getVaultStrategy() {
     address: ETH_YIELD_VAULT_ADDRESS as `0x${string}`,
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'strategy',
-    chain: ethereum,
   })
 }
 
@@ -227,7 +224,6 @@ export async function getVaultShares(address: string) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
-    chain: ethereum,
   })
 }
 
@@ -348,7 +344,6 @@ export async function vaultPreviewDeposit(assets: bigint) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'previewDeposit',
     args: [assets],
-    chain: ethereum,
   })
 }
 
@@ -358,7 +353,6 @@ export async function vaultPreviewMint(shares: bigint) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'previewMint',
     args: [shares],
-    chain: ethereum,
   })
 }
 
@@ -368,7 +362,6 @@ export async function vaultPreviewRedeem(shares: bigint) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'previewRedeem',
     args: [shares],
-    chain: ethereum,
   })
 }
 
@@ -378,7 +371,6 @@ export async function vaultPreviewWithdraw(assets: bigint) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'previewWithdraw',
     args: [assets],
-    chain: ethereum,
   })
 }
 
@@ -388,7 +380,6 @@ export async function vaultConvertToAssets(shares: bigint) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'convertToAssets',
     args: [shares],
-    chain: ethereum,
   })
 }
 
@@ -398,7 +389,6 @@ export async function vaultConvertToShares(assets: bigint) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'convertToShares',
     args: [assets],
-    chain: ethereum,
   })
 }
 
