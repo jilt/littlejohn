@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { initSDK } from './connector'
+import { initSDK, WalletProvider } from './connector.tsx'
 import NavBar from './components/NavBar'
 import Taskbar from './components/Taskbar'
 import LandingPanel from './components/LandingPanel'
@@ -23,31 +23,33 @@ function App() {
   }
 
   return (
-    <div className="desktop">
-      <NavBar />
-      
-      <div className="desktop-icons">
-        {windows.landing && (
-          <Window98 title="Little John Bot" onClose={() => toggleWindow('landing')}>
-            <LandingPanel />
-          </Window98>
-        )}
+    <WalletProvider>
+      <div className="desktop">
+        <NavBar />
         
-                {windows.rewards && (
-          <Window98 title="Rewards" onClose={() => toggleWindow('rewards')}>
-            <RewardsPanel />
-          </Window98>
-        )}
+        <div className="desktop-icons">
+          {windows.landing && (
+            <Window98 title="Little John Bot" onClose={() => toggleWindow('landing')}>
+              <LandingPanel />
+            </Window98>
+          )}
+          
+          {windows.rewards && (
+            <Window98 title="Rewards" onClose={() => toggleWindow('rewards')}>
+              <RewardsPanel />
+            </Window98>
+          )}
+          
+          {windows.deposit && (
+            <Window98 title="Deposit / Withdraw" onClose={() => toggleWindow('deposit')}>
+              <DepositPanel />
+            </Window98>
+          )}
+        </div>
         
-        {windows.deposit && (
-          <Window98 title="Deposit / Withdraw" onClose={() => toggleWindow('deposit')}>
-            <DepositPanel />
-          </Window98>
-        )}
+        <Taskbar windows={windows} onToggle={toggleWindow} />
       </div>
-      
-      <Taskbar windows={windows} onToggle={toggleWindow} />
-    </div>
+    </WalletProvider>
   )
 }
 

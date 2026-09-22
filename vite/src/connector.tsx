@@ -3,6 +3,13 @@ import { createPublicClient, createWalletClient, http, custom } from 'viem'
 import { sdk } from '@farcaster/miniapp-sdk'
 import { robinhood, ethereum } from './chains'
 import { ETH_YIELD_VAULT_ABI, ETH_YIELD_VAULT_ADDRESS } from './config/ethYieldVaultABI'
+import { CONTRACTS } from './config/contracts'
+
+const KYBERSWAP_API = 'https://aggregator-api.kyberswap.com/robinhood/api/v1'
+const KYBERSWAP_CROSS_CHAIN_API = 'https://aggregator-api.kyberswap.com/api/v1/cross-chain'
+const X_CLIENT_ID = 'ai-agent-skills'
+
+const KYBERSWAP_EARN_API = 'https://earn-service.kyberswap.com/api/v1'
 
 const PUBLIC_CLIENT = createPublicClient({
   chain: robinhood,
@@ -181,14 +188,26 @@ export async function sendRawTransaction(params: {
       value,
     })
 
-  return client.sendTransaction({
-    account,
-    to,
-    data,
-    value,
-    gas: (gasLimit * 120n) / 100n,
-    chain: robinhood,
-  })
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await client.sendTransaction({
+        account,
+        to,
+        data,
+        value,
+        gas: (gasLimit * 120n) / 100n,
+        chain: robinhood,
+      })
+    } catch (err: any) {
+      if (err.message?.includes('Extension context invalidated') && attempt < 2) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        continue
+      }
+      throw err
+    }
+  }
+
+  throw new Error('Transaction failed after retries')
 }
 
 // ─── EthYieldVault helpers ────────────────────────────────────
@@ -224,6 +243,45 @@ export async function getVaultShares(address: string) {
     abi: ETH_YIELD_VAULT_ABI,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
+  })
+}
+
+export async function getTokenBalance(params: {
+  tokenAddress: string
+  account: string
+}): Promise<bigint> {
+  const { tokenAddress, account } = params
+  return await PUBLIC_CLIENT.readContract({
+    address: tokenAddress as `0x${string}`,
+    abi: [{
+      name: 'balanceOf',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'account', type: 'address' }],
+      outputs: [{ name: 'balance', type: 'uint256' }],
+    }],
+    functionName: 'balanceOf',
+    args: [account as `0x${string}`],
+  })
+}
+
+export async function getAllowance(params: {
+  tokenAddress: string
+  owner: string
+  spender: string
+}): Promise<bigint> {
+  const { tokenAddress, owner, spender } = params
+  return await PUBLIC_CLIENT.readContract({
+    address: tokenAddress as `0x${string}`,
+    abi: [{
+      name: 'allowance',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }],
+      outputs: [{ name: 'value', type: 'uint256' }],
+    }],
+    functionName: 'allowance',
+    args: [owner as `0x${string}`, spender as `0x${string}`],
   })
 }
 
@@ -390,6 +448,69 @@ export async function vaultConvertToShares(assets: bigint) {
     functionName: 'convertToShares',
     args: [assets],
   })
+}
+
+export async function bridgeUSDGToUSDC(
+  amount: bigint,
+  fromAddress: string,
+  toAddress: string
+): Promise<{ txHash: string; amountOut: bigint }> {
+  const deadline = Math.floor(Date.now() / 1000) + 600
+
+  const resp = await fetch(KYBERSWAP_CROSS_CHAIN_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Client-Id': X_CLIENT_ID,
+    },
+    body: JSON.stringify({
+      chainId: 4663,
+      tokenIn: CONTRACTS.robinhood.stableCoin,
+      tokenOut: CONTRACTS.ethereum.usdc,
+      amountIn: amount.toString(),
+      recipient: toAddress,
+      deadline,
+      source: 'ai-agent-skills',
+    }),
+  })
+
+  if (!resp.ok) throw new Error(`Bridge quote failed: ${resp.status}`)
+  const json = await resp.json()
+  if (json.code !== 0) throw new Error(json.message || 'Bridge quote failed')
+
+  const quote = json.data
+
+  const buildResp = await fetch(`${KYBERSWAP_CROSS_CHAIN_API}/build`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Client-Id': X_CLIENT_ID,
+    },
+    body: JSON.stringify({
+      quoteId: quote.quoteId,
+      sender: fromAddress,
+      receiver: toAddress,
+      slippageTolerance: 50,
+      deadline,
+      source: 'ai-agent-skills',
+    }),
+  })
+
+  if (!buildResp.ok) throw new Error(`Bridge build failed: ${buildResp.status}`)
+  const buildJson = await buildResp.json()
+  if (buildJson.code !== 0) throw new Error(buildJson.message || 'Bridge build failed')
+
+  const tx = buildJson.data
+
+  const txHash = await sendRawTransaction({
+    account: fromAddress as `0x${string}`,
+    to: tx.to as `0x${string}`,
+    data: tx.data as `0x${string}`,
+    value: tx.value ? BigInt(tx.value) : 0n,
+    gas: tx.gas ? BigInt(tx.gas) : undefined,
+  })
+
+  return { txHash, amountOut: BigInt(quote.amountOut || '0') }
 }
 
 export { PUBLIC_CLIENT, ETHEREUM_PUBLIC_CLIENT, getWalletClient }

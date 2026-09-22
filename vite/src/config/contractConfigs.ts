@@ -1,4 +1,37 @@
 import { ETH_YIELD_VAULT_ABI } from './ethYieldVaultABI'
+import { ROBINHOOD_ADAPTER_ADDRESS, ROBINHOOD_ADAPTER_ABI, USDG_ETHEREUM } from './contracts'
+
+// Robinhood Deposit Adapter configuration
+export const ROBINHOOD_ADAPTER_CONFIG = {
+  address: ROBINHOOD_ADAPTER_ADDRESS,
+  chainId: 4663,
+  blockExplorer: 'https://robinhoodchain.blockscout.com',
+  abi: ROBINHOOD_ADAPTER_ABI,
+  functions: {
+    depositAndBridge: {
+      name: 'depositAndBridge',
+      inputs: [
+        { name: 'amount', type: 'uint256' },
+        { name: 'recipient', type: 'address' },
+      ],
+      outputs: [{ name: 'requestId', type: 'uint256' }],
+    },
+  },
+}
+
+// USDG Token (Ethereum) configuration
+export const USDG_ETHEREUM_CONFIG = {
+  address: USDG_ETHEREUM,
+  chainId: 1,
+  blockExplorer: 'https://etherscan.io',
+  functions: {
+    balanceOf: {
+      name: 'balanceOf',
+      inputs: [{ name: 'owner', type: 'address' }],
+      outputs: [{ name: 'balance', type: 'uint256' }],
+    },
+  },
+}
 
 // BotYieldPass contract configuration
 export const BOT_YIELD_PASS_CONFIG = {
@@ -81,26 +114,24 @@ export const ETH_YIELD_VAULT_CONFIG = {
   }
 }
 
-// LJB Token (ERC20) configuration
+// LJB Token (ERC20) configuration on Robinhood Chain
 export const LJB_TOKEN_CONFIG = {
-  address: '0xF0C81b03A33463272a5466AfAeD628989A030F82',
-  chainId: 677, // BOT Chain
-  blockExplorer: 'https://scan.botchain.ai',
+  address: '0xf0c81b03a33463272a5466afaed628989a030f82',
+  chainId: 4663,
+  blockExplorer: 'https://robinhoodchain.blockscout.com',
   functions: {
     balanceOf: {
       name: 'balanceOf',
-      inputs: [
-        { name: 'owner', type: 'address' }
-      ],
-      outputs: [{ name: 'balance', type: 'uint256' }]
+      inputs: [{ name: 'owner', type: 'address' }],
+      outputs: [{ name: 'balance', type: 'uint256' }],
     },
-    transfer: {
-      name: 'transfer',
+    allowance: {
+      name: 'allowance',
       inputs: [
-        { name: 'to', type: 'address' },
-        { name: 'amount', type: 'uint256' }
+        { name: 'owner', type: 'address' },
+        { name: 'spender', type: 'address' },
       ],
-      outputs: [{ name: 'success', type: 'bool' }]
-    }
-  }
+      outputs: [{ name: 'value', type: 'uint256' }],
+    },
+  },
 }
