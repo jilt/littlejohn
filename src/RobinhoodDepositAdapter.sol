@@ -45,7 +45,7 @@ contract RobinhoodDepositAdapter is Ownable {
         router = _router;
     }
 
-    function depositAndBridge(uint256 amount, address recipient) external returns (uint256 requestId) {
+    function depositAndBridge(uint256 amount, address recipient) external returns (uint256 requestId, uint256 amountOut) {
         if (amount == 0) revert ZeroAmount();
         if (recipient == address(0)) revert ZeroAddress();
 
@@ -53,7 +53,7 @@ contract RobinhoodDepositAdapter is Ownable {
         if (balance < amount) revert InsufficientBalance();
 
         openLaunchToken.transferFrom(msg.sender, address(this), amount);
-        uint256 amountOut = _swapToStable(amount);
+        amountOut = _swapToStable(amount);
         if (amountOut == 0) revert ZeroAmount();
 
         if (amountOut * 10000 < amount * (10000 - maxSlippageBps)) revert SlippageExceeded();
@@ -61,6 +61,12 @@ contract RobinhoodDepositAdapter is Ownable {
         requestId = nonce++;
         emit BridgeRequestEmitted(requestId, amountOut, recipient, nonce, block.timestamp);
         emit TokenSwapped(amount, amountOut);
+    }
+
+    function withdrawUSDG(uint256 amount) external {
+        if (amount == 0) revert ZeroAmount();
+        if (stableToken.balanceOf(address(this)) < amount) revert InsufficientBalance();
+        stableToken.transfer(msg.sender, amount);
     }
 
     function _swapToStable(uint256 amount) internal returns (uint256) {

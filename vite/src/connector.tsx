@@ -115,6 +115,27 @@ export async function getBalance(address: `0x${string}`): Promise<bigint> {
   return await PUBLIC_CLIENT.getBalance({ address })
 }
 
+export async function simulateContract(params: {
+  account: string
+  address: string
+  abi: any
+  functionName: string
+  args: any[]
+  chain?: any
+}) {
+  const { account, address, abi, functionName, args, chain = robinhood } = params
+  const client = getWalletClient(account, chain)
+  const { result } = await client.simulateContract({
+    account: account as `0x${string}`,
+    address: address as `0x${string}`,
+    abi,
+    functionName,
+    args,
+    chain,
+  })
+  return result
+}
+
 export async function sendContractTransaction(params: {
   account: string
   address: string

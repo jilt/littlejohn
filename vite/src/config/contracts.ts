@@ -4,7 +4,7 @@ export const ROBINHOOD_ROUTER = '0x8876789976dEcBfCbBbe364623C63652db8C0904'
 
 export const ROBINHOOD_LJB_TOKEN = '0xF0C81b03A33463272a5466AfAeD628989A030F82'
 
-export const ROBINHOOD_ADAPTER_ADDRESS = '0x8a01954f86a7bDDCd64450adD08E84B1A24b4910'
+export const ROBINHOOD_ADAPTER_ADDRESS = '0x27c1884B8b1487d7a727a61746151401e32499B1'
 
 export const USDG_ETHEREUM = '0xe343167631d89B6Ffc58B88d6b7fB0228795491D'
 
@@ -12,7 +12,14 @@ export const ROBINHOOD_ADAPTER_ABI = [
   {
     inputs: [{ name: 'amount', type: 'uint256' }, { name: 'recipient', type: 'address' }],
     name: 'depositAndBridge',
-    outputs: [{ name: 'requestId', type: 'uint256' }],
+    outputs: [{ name: 'requestId', type: 'uint256' }, { name: 'amountOut', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'amount', type: 'uint256' }],
+    name: 'withdrawUSDG',
+    outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
