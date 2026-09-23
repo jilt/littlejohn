@@ -39,6 +39,26 @@ const ERC20_TRANSFER_ABI = [
   },
 ] as const
 
+const ADAPTER_DEPOSIT_ABI = [
+  {
+    inputs: [{ name: 'amount', type: 'uint256' }, { name: 'recipient', type: 'address' }],
+    name: 'depositAndBridge',
+    outputs: [{ name: 'requestId', type: 'uint256' }, { name: 'amountOut', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const
+
+const ADAPTER_WITHDRAW_ABI = [
+  {
+    inputs: [{ name: 'amount', type: 'uint256' }],
+    name: 'withdrawUSDG',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const
+
 interface IntentToken {
   assetId: string
   blockchain: string
@@ -86,15 +106,18 @@ export default function DepositPanel() {
       try {
         const resp = await fetch(`${ONECLICK_API}/v0/tokens`)
         const tokens = (await resp.json()) as IntentToken[]
+        console.log('[DepositPanel] blockchains:', [...new Set(tokens.map(t => t.blockchain))])
         const byContract = (chain: string, addr: string) =>
           tokens.find(
-            t => t.blockchain === chain &&
+            t =>
+              t.blockchain === chain &&
               t.contractAddress?.toLowerCase() === addr.toLowerCase()
           ) ?? null
 
         const ljb = byContract('robinhood', LJB_TOKEN)
         const usdg = byContract('robinhood', USDG_ROBINHOOD)
         const usdc = byContract('eth', USDC_ETHEREUM)
+        console.log('[DepositPanel] probe:', { ljb: !!ljb, usdg: !!usdg, usdc: !!usdc })
         if (cancelled) return
 
         if (ljb && usdc) {
@@ -106,7 +129,8 @@ export default function DepositPanel() {
         } else {
           setPath('unsupported')
         }
-      } catch {
+      } catch (err) {
+        console.error('[DepositPanel] token probe failed', err)
         if (!cancelled) setPath('unsupported')
       }
     })()
@@ -131,9 +155,9 @@ export default function DepositPanel() {
         depositType: 'ORIGIN_CHAIN',
         destinationAsset: intentAssets.dest.assetId,
         amount: amountIn.toString(),
-        recipient: userAddress,       // EOA — same address on Ethereum
+        recipient: userAddress,
         recipientType: 'DESTINATION_CHAIN',
-        refundTo: userAddress,        // refund lands back on Robinhood
+        refundTo: userAddress,
         refundType: 'ORIGIN_CHAIN',
         deadline: new Date(Date.now() + QUOTE_TTL_MS).toISOString(),
         referral: 'ai-agent-skills',
@@ -226,37 +250,36 @@ export default function DepositPanel() {
       })
     }
 
+    // 1) Simulate to read amountOut (transactions only return a hash)
     setBridgeStep('depositing')
     const simulated = await simulateContract({
       account: userAddress,
       address: ADAPTER_ADDRESS,
-      abi: [
-        {
-          inputs: [{ name: 'amount', type: 'uint256' }, { name: 'recipient', type: 'address' }],
-          name: 'depositAndBridge',
-          outputs: [{ name: 'requestId', type: 'uint256' }, { name: 'amountOut', type: 'uint256' }],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-      ],
+      abi: ADAPTER_DEPOSIT_ABI,
       functionName: 'depositAndBridge',
       args: [assets, userAddress],
     })
-    const amountOut = (simulated as any).amountOut ?? (simulated as any).result?.[1] ?? BigInt(0)
+    const amountOut =
+      (simulated as any).result?.amountOut ??
+      (simulated as any).result?.[1] ??
+      (simulated as any).amountOut ??
+      0n
+    if (amountOut <= 0n) throw new Error('Adapter simulation returned no USDG output')
+
+    // 2) Execute the real deposit
+    await sendContractTransaction({
+      account: userAddress,
+      address: ADAPTER_ADDRESS,
+      abi: ADAPTER_DEPOSIT_ABI,
+      functionName: 'depositAndBridge',
+      args: [assets, userAddress],
+    })
 
     setBridgeStep('withdrawing')
     await sendContractTransaction({
       account: userAddress,
       address: ADAPTER_ADDRESS,
-      abi: [
-        {
-          inputs: [{ name: 'amount', type: 'uint256' }],
-          name: 'withdrawUSDG',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-      ],
+      abi: ADAPTER_WITHDRAW_ABI,
       functionName: 'withdrawUSDG',
       args: [amountOut],
     })
@@ -286,7 +309,19 @@ export default function DepositPanel() {
   // --- Deposit flow -----------------------------------------------------------
 
   const handleDeposit = async () => {
-    if (!amount || Number(amount) <= 0 || !address || !intentAssets) return
+    console.log('[DepositPanel] click', { amount, address, path, hasAssets: !!intentAssets })
+    if (!amount || Number(amount) <= 0) {
+      setErrorMsg('Enter an amount first')
+      return
+    }
+    if (!address) {
+      setErrorMsg('Connect your wallet first')
+      return
+    }
+    if (!intentAssets) {
+      setErrorMsg(`No solver route available (path: ${path})`)
+      return
+    }
     setBridgeStep('idle')
     setErrorMsg('')
     setInsufficientBalance(false)
@@ -414,6 +449,11 @@ export default function DepositPanel() {
             style={{ width: '100%' }}
             onClick={handleDeposit}
             disabled={depositing || path === 'checking' || path === 'unsupported'}
+            title={
+              path === 'checking' ? 'Checking routes…' :
+              path === 'unsupported' ? 'No solver route' :
+              depositing ? 'Deposit in progress' : ''
+            }
           >
             {bridgeStep === 'done' ? 'Deposited!' : bridgeStep === 'error' ? 'Retry' : 'Deposit'}
           </button>
