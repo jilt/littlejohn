@@ -45,7 +45,6 @@ interface SwapTransaction { to: `0x${string}`; data: `0x${string}`; value?: stri
 interface UniswapQuote { requestId: string; routing: string; isTokenApprovalApplicable?: boolean; permitData?: unknown; quote: any; swapTransaction?: SwapTransaction | null }
 interface KyberQuote { routeSummary: unknown; amountOut?: string }
 
-const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
 const errorText = (error: unknown) => error instanceof Error ? error.message : typeof error === 'string' ? error : JSON.stringify(error)
 
 export default function DepositPanel() {
@@ -65,16 +64,6 @@ export default function DepositPanel() {
     const hash = await sendContractTransaction({ account: user, address: LJB_TOKEN, abi: ERC20_APPROVE_ABI, functionName: 'approve', args: [PERMIT2_ADDRESS, required], chain: robinhood }) as `0x${string}`
     const receipt = await waitForTransactionReceipt(hash)
     if (receipt.status !== 'success') throw new Error('LJB Permit2 approval reverted')
-  }
-
-  const waitForUsdcIncrease = async (user: string, starting: bigint) => {
-    const deadline = Date.now() + 30 * 60 * 1000
-    while (Date.now() < deadline) {
-      const current = await getTokenBalance({ tokenAddress: USDC_ETHEREUM, account: user, chain: ethereum })
-      if (current > starting) return current
-      await sleep(10_000)
-    }
-    throw new Error('Timed out waiting for Ethereum USDC settlement')
   }
 
   const handleDeposit = async () => {
@@ -154,7 +143,7 @@ export default function DepositPanel() {
 
   return <div>
     <div style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}><button className={`btn ${tab === 'deposit' ? 'btn-primary' : ''}`} onClick={() => setTab('deposit')}>Deposit</button><button className={`btn ${tab === 'withdraw' ? 'btn-primary' : ''}`} onClick={() => setTab('withdraw')}>Withdraw</button></div>
-    {tab === 'deposit' ? <div><p>Deposit LJB tokens (Robinhood Chain)</p><p style={{ fontSize: '12px', color: '#FFFFFF', opacity: 0.7 }}>LJB → native ETH → Uniswap bridge → Ethereum ETH → KyberSwap USDC vault</p><GetLjbTokens />{ljbBalance > 0n && <p style={{ fontSize: '12px', color: '#fff' }}>Your LJB balance: {formatUnits(ljbBalance, LJB_DECIMALS)}</p>}<input className="input" placeholder="Amount" value={amount} onChange={event => setAmount(event.target.value)} style={{ marginTop: '12px', marginBottom: '12px' }} /><button className="btn btn-primary" style={{ width: '100%' }} onClick={handleDeposit} disabled={depositing}>{step === 'done' ? 'Deposited!' : step === 'error' ? 'Retry' : 'Deposit'}</button>{step !== 'idle' && step !== 'done' && <p style={{ marginTop: '8px', fontSize: '12px', color: '#fff' }}>{labels[step]}</p>}{errorMsg && <p style={{ marginTop: '8px', fontSize: '12px', color: '#ff4444' }}>{errorMsg}</p>}{bridgeResponse && <pre style={{ marginTop: '12px', maxHeight: '320px', overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: '10px', color: '#fff', background: '#111', padding: '8px' }}>{JSON.stringify(bridgeResponse, null, 2)}</pre>}</div> : <div><p>Withdraw your share of the vault</p><div className="panel"><strong>Your Shares:</strong><br />0.00 LJB</div><input className="input" placeholder="Shares to withdraw" value={amount} onChange={event => setAmount(event.target.value)} /><button className="btn btn-primary" style={{ width: '100%' }}>Withdraw</button></div>}
+    {tab === 'deposit' ? <div><p>Deposit LJB tokens (Robinhood Chain)</p><GetLjbTokens />{ljbBalance > 0n && <p style={{ fontSize: '12px', color: '#fff' }}>Your LJB balance: {formatUnits(ljbBalance, LJB_DECIMALS)}</p>}<input className="input" placeholder="Amount" value={amount} onChange={event => setAmount(event.target.value)} style={{ marginTop: '12px', marginBottom: '12px' }} /><button className="btn btn-primary" style={{ width: '100%' }} onClick={handleDeposit} disabled={depositing}>{step === 'done' ? 'Deposited!' : step === 'error' ? 'Retry' : 'Deposit'}</button>{step !== 'idle' && step !== 'done' && <p style={{ marginTop: '8px', fontSize: '12px', color: '#fff' }}>{labels[step]}</p>}{errorMsg && <p style={{ marginTop: '8px', fontSize: '12px', color: '#ff4444' }}>{errorMsg}</p>}{bridgeResponse && <pre style={{ marginTop: '12px', maxHeight: '320px', overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: '10px', color: '#fff', background: '#111', padding: '8px' }}>{JSON.stringify(bridgeResponse, null, 2)}</pre>}</div> : <div><p>Withdraw your share of the vault</p><div className="panel"><strong>Your Shares:</strong><br />0.00 LJB</div><input className="input" placeholder="Shares to withdraw" value={amount} onChange={event => setAmount(event.target.value)} /><button className="btn btn-primary" style={{ width: '100%' }}>Withdraw</button></div>}
     <div className="status-bar">0% token fees • Fee only on reward claims</div>
   </div>
 }
