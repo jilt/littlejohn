@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react'
 import { encodeFunctionData, formatEther, formatUnits, getAddress, parseEther, parseUnits } from 'viem'
-import {
-  getContractBalance,
-  getWalletClient,
-  getBalance,
-  sendRawTransaction,
-  WalletContext,
-  PUBLIC_CLIENT,
-} from '../connector.tsx'
+import { getContractBalance, getWalletClient, getBalance, sendRawTransaction, WalletContext, PUBLIC_CLIENT } from '../connector.tsx'
 import { CONTRACTS } from '../config/contracts'
 import { robinhood } from '../chains'
 
@@ -20,14 +13,9 @@ const ETH_GAS_BUFFER = parseEther('0.0005')
 
 interface TokenBalance { symbol: string; address: string; balance: bigint; decimals: number }
 interface RouteData { amountOut: string; gasUsd: string; route: any; routeSummary: any; routerAddress: string }
+const ERC20_ABI = [{ name: 'approve', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'spender', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [{ name: 'success', type: 'bool' }] }] as const
 
-const ERC20_ABI = [{
-  name: 'approve', type: 'function', stateMutability: 'nonpayable',
-  inputs: [{ name: 'spender', type: 'address' }, { name: 'amount', type: 'uint256' }],
-  outputs: [{ name: 'success', type: 'bool' }],
-}] as const
-
-const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
+const errorText = (error: unknown) => error instanceof Error ? error.message : typeof error === 'string' ? error : JSON.stringify(error)
 
 export default function GetLjbTokens() {
   const { address, chainId, switchChain } = useContext(WalletContext)
@@ -51,35 +39,19 @@ export default function GetLjbTokens() {
   }, [chainId, switchChain])
 
   const fetchBalances = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true); setError(null)
     try {
       await requireRobinhood()
-      const walletClient = getWalletClient(undefined, robinhood)
-      const accounts = await walletClient.getAddresses()
+      const accounts = await getWalletClient(undefined, robinhood).getAddresses()
       if (!accounts[0]) throw new Error('Connect your wallet before loading balances')
       const walletAddress = getAddress(accounts[0])
       const [ethBalance, usdgBalance, ljbBalance] = await Promise.all([
         getBalance(walletAddress, robinhood),
-        getContractBalance({
-          address: tokenConfig.USDG.address,
-          abi: [{ name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ name: 'balance', type: 'uint256' }] }],
-          functionName: 'balanceOf', args: [walletAddress], chain: robinhood,
-        }),
-        getContractBalance({
-          address: LJB_TOKEN,
-          abi: [{ name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ name: 'balance', type: 'uint256' }] }],
-          functionName: 'balanceOf', args: [walletAddress], chain: robinhood,
-        }),
+        getContractBalance({ address: tokenConfig.USDG.address, abi: [{ name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ name: 'balance', type: 'uint256' }] }], functionName: 'balanceOf', args: [walletAddress], chain: robinhood }),
+        getContractBalance({ address: LJB_TOKEN, abi: [{ name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ name: 'balance', type: 'uint256' }] }], functionName: 'balanceOf', args: [walletAddress], chain: robinhood }),
       ])
-      setBalances({
-        ETH: { symbol: 'ETH', address: tokenConfig.ETH.address, balance: ethBalance, decimals: 18 },
-        USDG: { symbol: 'USDG', address: tokenConfig.USDG.address, balance: usdgBalance as bigint, decimals: 6 },
-        LJB: { symbol: 'LJB', address: LJB_TOKEN, balance: ljbBalance as bigint, decimals: LJB_DECIMALS },
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch balances')
-    } finally { setLoading(false) }
+      setBalances({ ETH: { symbol: 'ETH', address: tokenConfig.ETH.address, balance: ethBalance, decimals: 18 }, USDG: { symbol: 'USDG', address: tokenConfig.USDG.address, balance: usdgBalance as bigint, decimals: 6 }, LJB: { symbol: 'LJB', address: LJB_TOKEN, balance: ljbBalance as bigint, decimals: LJB_DECIMALS } })
+    } catch (err) { setError(errorText(err)) } finally { setLoading(false) }
   }, [requireRobinhood, tokenConfig.USDG.address])
 
   useEffect(() => { if (isOpen) void fetchBalances() }, [isOpen, fetchBalances])
@@ -89,35 +61,29 @@ export default function GetLjbTokens() {
     const amountWei = parseUnits(amountHuman, tokenIn.decimals).toString()
     const url = new URL(`${KYBERSWAP_API}/routes`)
     url.search = new URLSearchParams({ tokenIn: tokenIn.address, tokenOut: LJB_TOKEN, amountIn: amountWei, source: KYBER_CLIENT_ID }).toString()
-    const resp = await fetch(url, { headers: { 'X-Client-Id': KYBER_CLIENT_ID } })
-    const json = await resp.json()
-    if (!resp.ok || json.code !== 0) throw new Error(json.message || `KyberSwap quote failed: HTTP ${resp.status}`)
-    const routeData = json.data
-    if (!routeData?.routeSummary) throw new Error('No route found')
-    if (!routeData.routeSummary.amountOut || BigInt(routeData.routeSummary.amountOut) <= 0n) throw new Error('KyberSwap returned zero LJB output')
-    return { amountOut: routeData.routeSummary.amountOut, gasUsd: routeData.routeSummary.gasUsd ?? '0.00', route: routeData.route, routeSummary: routeData.routeSummary, routerAddress: getAddress(routeData.routerAddress) }
+    const response = await fetch(url, { headers: { 'X-Client-Id': KYBER_CLIENT_ID } })
+    const raw = await response.text()
+    let json: any
+    try { json = JSON.parse(raw) } catch { throw new Error(`KyberSwap quote returned invalid JSON: ${raw.slice(0, 300)}`) }
+    if (!response.ok || json.code !== 0) throw new Error(json.message || `KyberSwap quote failed: HTTP ${response.status}`)
+    if (!json.data?.routeSummary) throw new Error('No route found')
+    if (!json.data.routeSummary.amountOut || BigInt(json.data.routeSummary.amountOut) <= 0n) throw new Error('KyberSwap returned zero LJB output')
+    return { amountOut: json.data.routeSummary.amountOut, gasUsd: json.data.routeSummary.gasUsd ?? '0.00', route: json.data.route, routeSummary: json.data.routeSummary, routerAddress: getAddress(json.data.routerAddress) }
   }
 
   const handleMax = () => {
-    const bal = balances[selectedToken]
-    if (!bal) return
-    const spendable = selectedToken === 'ETH' && bal.balance > ETH_GAS_BUFFER ? bal.balance - ETH_GAS_BUFFER : selectedToken === 'ETH' ? 0n : bal.balance
+    const bal = balances[selectedToken]; if (!bal) return
+    const spendable = selectedToken === 'ETH' ? (bal.balance > ETH_GAS_BUFFER ? bal.balance - ETH_GAS_BUFFER : 0n) : bal.balance
     setAmount(selectedToken === 'ETH' ? formatEther(spendable) : formatUnits(spendable, bal.decimals))
   }
 
   const handleQuote = async () => {
     if (!amount || Number(amount) <= 0) return
     setError(null); setButtonText('Getting Quote...')
-    try { setQuoteResult(await fetchRoute(selectedToken, amount)); setButtonText('Swap') }
-    catch (err) { setError(err instanceof Error ? err.message : 'Quote failed'); setButtonText('Quote') }
+    try { setQuoteResult(await fetchRoute(selectedToken, amount)); setButtonText('Swap') } catch (err) { setError(errorText(err)); setButtonText('Quote') }
   }
 
-  const checkAllowance = async (owner: string, spender: string, token: string) => {
-    return await getContractBalance({
-      address: token, abi: [{ name: 'allowance', type: 'function', stateMutability: 'view', inputs: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }], outputs: [{ name: 'value', type: 'uint256' }] }],
-      functionName: 'allowance', args: [getAddress(owner), getAddress(spender)], chain: robinhood,
-    }) as bigint
-  }
+  const checkAllowance = async (owner: string, spender: string, token: string) => getContractBalance({ address: token, abi: [{ name: 'allowance', type: 'function', stateMutability: 'view', inputs: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }], outputs: [{ name: 'value', type: 'uint256' }] }], functionName: 'allowance', args: [getAddress(owner), getAddress(spender)], chain: robinhood }) as Promise<bigint>
 
   const handleSwap = async () => {
     if (!quoteResult || !amount || !address) { setError('Connect wallet and get a quote first'); return }
@@ -135,33 +101,41 @@ export default function GetLjbTokens() {
         if (allowance < amountWei) {
           const approveData = encodeFunctionData({ abi: ERC20_ABI, functionName: 'approve', args: [freshRoute.routerAddress as `0x${string}`, amountWei] })
           const approveTx = await sendRawTransaction({ account: user, to: getAddress(tokenIn.address), data: approveData, value: 0n, chain: robinhood })
-          const approvalReceipt = await PUBLIC_CLIENT.waitForTransactionReceipt({ hash: approveTx as `0x${string}` })
-          if (approvalReceipt.status !== 'success') throw new Error('Token approval reverted')
+          const receipt = await PUBLIC_CLIENT.waitForTransactionReceipt({ hash: approveTx as `0x${string}` })
+          if (receipt.status !== 'success') throw new Error('Token approval reverted')
         }
       }
 
-      const buildResp = await fetch(`${KYBERSWAP_API}/route/build`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Client-Id': KYBER_CLIENT_ID },
-        body: JSON.stringify({ routeSummary: freshRoute.routeSummary, sender: user, recipient: user, slippageTolerance: 50, deadline: Math.floor(Date.now() / 1000) + 600, source: KYBER_CLIENT_ID, skipSimulateTx: false, enableGasEstimation: true }),
-      })
-      const buildJson = await buildResp.json()
-      if (!buildResp.ok || buildJson.code !== 0) throw new Error(buildJson.message || `Build failed: HTTP ${buildResp.status}`)
+      const buildResponse = await fetch(`${KYBERSWAP_API}/route/build`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Client-Id': KYBER_CLIENT_ID }, body: JSON.stringify({ routeSummary: freshRoute.routeSummary, sender: user, recipient: user, slippageTolerance: 50, deadline: Math.floor(Date.now() / 1000) + 600, source: KYBER_CLIENT_ID, skipSimulateTx: false, enableGasEstimation: true }) })
+      const buildRaw = await buildResponse.text()
+      let buildJson: any
+      try { buildJson = JSON.parse(buildRaw) } catch { throw new Error(`KyberSwap build returned invalid JSON: ${buildRaw.slice(0, 500)}`) }
+      if (!buildResponse.ok || buildJson.code !== 0) throw new Error(buildJson.message || `Build failed: HTTP ${buildResponse.status}`)
       const tx = buildJson.data
       if (!tx?.routerAddress || !tx?.data) throw new Error('KyberSwap build returned an incomplete transaction')
+      const routerAddress = getAddress(tx.routerAddress)
+      const txData = tx.data as `0x${string}`
       const txValue = tx.transactionValue ? BigInt(tx.transactionValue) : 0n
       const walletChainId = await getWalletClient(user, robinhood).getChainId()
       if (walletChainId !== robinhood.id) throw new Error(`Wallet is on chain ${walletChainId}; expected ${robinhood.id}`)
       const nativeBalance = await getBalance(user, robinhood)
-      if (nativeBalance < txValue) throw new Error('Insufficient Robinhood ETH for swap value and gas')
-      const gasLimit = tx.gas ? BigInt(tx.gas) : await PUBLIC_CLIENT.estimateGas({ account: user, to: getAddress(tx.routerAddress), data: tx.data, value: txValue })
-      if (nativeBalance < txValue + gasLimit * (await PUBLIC_CLIENT.getGasPrice())) throw new Error('Insufficient Robinhood ETH for swap gas')
-      await PUBLIC_CLIENT.call({ account: user, to: getAddress(tx.routerAddress), data: tx.data, value: txValue })
-      const hash = await sendRawTransaction({ account: user, to: getAddress(tx.routerAddress), data: tx.data, value: txValue, gas: gasLimit, chain: robinhood })
+      const gasPrice = await PUBLIC_CLIENT.getGasPrice()
+      const gasLimit = tx.gas ? BigInt(tx.gas) : await PUBLIC_CLIENT.estimateGas({ account: user, to: routerAddress, data: txData, value: txValue })
+      if (nativeBalance < txValue + gasLimit * gasPrice) throw new Error('Insufficient Robinhood ETH for swap value and gas')
+
+      try {
+        await PUBLIC_CLIENT.call({ account: user, to: routerAddress, data: txData, value: txValue })
+      } catch (simulationError) {
+        console.error('[GetLjbTokens] KyberSwap simulation failed', { simulationError, routerAddress, txValue: txValue.toString(), gasLimit: gasLimit.toString(), routeSummary: freshRoute.routeSummary, buildResponse: buildJson })
+        throw new Error(`KyberSwap simulation failed: ${errorText(simulationError)}`)
+      }
+
+      console.log('[GetLjbTokens] KyberSwap transaction', { routerAddress, txValue: txValue.toString(), gasLimit: gasLimit.toString(), routeSummary: freshRoute.routeSummary })
+      const hash = await sendRawTransaction({ account: user, to: routerAddress, data: txData, value: txValue, gas: gasLimit, chain: robinhood })
       const receipt = await PUBLIC_CLIENT.waitForTransactionReceipt({ hash: hash as `0x${string}` })
-      if (receipt.status !== 'success') throw new Error('KyberSwap swap reverted')
+      if (receipt.status !== 'success') throw new Error(`KyberSwap swap reverted. Transaction: ${hash}`)
       setButtonText('Quote'); setQuoteResult(null); setAmount(''); await fetchBalances()
-    } catch (err) { console.error(err); setError(err instanceof Error ? err.message : 'Swap failed'); setButtonText('Swap') }
-    finally { setIsSwapping(false) }
+    } catch (err) { console.error(err); setError(errorText(err)); setButtonText('Swap') } finally { setIsSwapping(false) }
   }
 
   const toggleAccordion = () => { setIsOpen(prev => !prev); setError(null); setQuoteResult(null); setButtonText('Quote'); setAmount('') }
