@@ -91,7 +91,7 @@ export default function DepositPanel() {
       setLjbBalance(balance)
       if (balance < amountIn) throw new Error('Insufficient LJB balance')
 
-      // The existing first leg is intentionally unchanged: LJB -> native ETH on Robinhood.
+      // Existing working first leg: intentionally unchanged.
       setStep('quoting')
       const firstLeg = await quoteUniswapBridge({ tokenIn: LJB_TOKEN, tokenOut: NATIVE_ETH, tokenInChainId: ROBINHOOD_CHAIN_ID, tokenOutChainId: ROBINHOOD_CHAIN_ID, amount: amountIn, swapper: user }) as UniswapQuote
       if (!firstLeg.swapTransaction) throw new Error('First-leg Uniswap quote did not return a transaction')
@@ -127,7 +127,7 @@ export default function DepositPanel() {
       setStep('ethereum_swap')
       const kyberQuote = await quoteKyberSwap({ chainId: ETHEREUM_CHAIN_ID, tokenIn: KYBER_NATIVE_ETH, tokenOut: USDC_ETHEREUM, amountIn: ethBeforeKyber.toString(), sender: user }) as KyberQuote
       const kyberTx = await buildKyberSwapTransaction({ chainId: ETHEREUM_CHAIN_ID, routeSummary: kyberQuote.routeSummary, sender: user, recipient: user })
-      const kyberHash = await sendRawTransaction({ account: user, to: getAddress(kyberTx.to), data: kyberTx.data, value: BigInt(kyberTx.value ?? '0'), gas: kyberTx.gas ? BigInt(kyberTx.gas) : undefined, chain: ethereum })
+      const kyberHash = await sendRawTransaction({ account: user, to: kyberTx.to, data: kyberTx.data, value: kyberTx.value, gas: kyberTx.gas, chain: ethereum })
       const kyberReceipt = await waitForEthereumTransactionReceipt(kyberHash)
       if (kyberReceipt.status !== 'success') throw new Error('KyberSwap Ethereum ETH → USDC swap reverted')
 
