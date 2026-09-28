@@ -3,13 +3,14 @@ pragma solidity 0.8.28;
 
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 
 contract RobinhoodDepositAdapter is Ownable {
-    IERC20 public openLaunchToken;
-    IERC20 public stableToken;
-    uint256 public constant ZERO_FEE_BPS = 0;
-    uint256 public maxSlippageBps;
-    address public router;
+    using SafeERC20 for IERC20;
+
+    IERC20 public immutable openLaunchToken;
+    IERC20 public immutable stableToken;
+    address public immutable router;
 
     struct BridgeRequest {
         uint256 amount;
@@ -19,90 +20,127 @@ contract RobinhoodDepositAdapter is Ownable {
     }
 
     uint256 public nonce;
+    mapping(address => uint256) public withdrawableUSDG;
 
     event BridgeRequestEmitted(
-        uint256 indexed requestId, uint256 amount, address indexed recipient, uint256 nonce, uint256 timestamp
+        uint256 indexed requestId,
+        uint256 amount,
+        address indexed recipient,
+        uint256 nonce,
+        uint256 timestamp
     );
-    event TokenSwapped(uint256 indexed amount, uint256 amountOut);
-    event RouterUpdated(address indexed oldRouter, address indexed newRouter);
-    event StableTokenUpdated(address indexed oldStable, address indexed newStable);
+    event TokenSwapped(uint256 indexed amountIn, uint256 amountOut);
+    event USDGCredited(address indexed recipient, uint256 amount);
+    event USDGWithdrawn(address indexed recipient, uint256 amount);
+    event RouterApprovalUpdated(address indexed token, address indexed router, uint256 amount);
 
     error ZeroAmount();
-    error NotOwner();
     error InsufficientBalance();
-    error SlippageExceeded();
+    error InsufficientCredit();
     error ZeroAddress();
+    error SwapFailed();
+    error InvalidSwapReturnData();
+    error InvalidAmountOutMinimum();
 
-    constructor(address _openLaunchToken, address _stableToken, uint256 _maxSlippageBps, address _router)
-        Ownable(msg.sender)
-    {
-        if (_openLaunchToken == address(0) || _stableToken == address(0) || _router == address(0)) {
+    constructor(
+        address _openLaunchToken,
+        address _stableToken,
+        address _router
+    ) Ownable(msg.sender) {
+        if (
+            _openLaunchToken == address(0) ||
+            _stableToken == address(0) ||
+            _router == address(0)
+        ) {
             revert ZeroAddress();
         }
+
         openLaunchToken = IERC20(_openLaunchToken);
         stableToken = IERC20(_stableToken);
-        maxSlippageBps = _maxSlippageBps;
         router = _router;
     }
 
-    function depositAndBridge(uint256 amount, address recipient) external returns (uint256 requestId, uint256 amountOut) {
-        if (amount == 0) revert ZeroAmount();
+    function depositAndBridge(
+        uint256 amount,
+        uint256 amountOutMin,
+        address recipient
+    ) external returns (uint256 requestId, uint256 amountOut) {
+        if (amount == 0 || amountOutMin == 0) {
+            revert ZeroAmount();
+        }
         if (recipient == address(0)) revert ZeroAddress();
 
-        uint256 balance = openLaunchToken.balanceOf(msg.sender);
-        if (balance < amount) revert InsufficientBalance();
+        if (openLaunchToken.balanceOf(msg.sender) < amount) {
+            revert InsufficientBalance();
+        }
 
-        openLaunchToken.transferFrom(msg.sender, address(this), amount);
-        amountOut = _swapToStable(amount);
+        openLaunchToken.safeTransferFrom(msg.sender, address(this), amount);
+        openLaunchToken.forceApprove(router, amount);
+
+        amountOut = _swapToStable(amount, amountOutMin);
         if (amountOut == 0) revert ZeroAmount();
+        if (amountOut < amountOutMin) revert InvalidAmountOutMinimum();
 
-        if (amountOut * 10000 < amount * (10000 - maxSlippageBps)) revert SlippageExceeded();
+        withdrawableUSDG[recipient] += amountOut;
 
         requestId = nonce++;
-        emit BridgeRequestEmitted(requestId, amountOut, recipient, nonce, block.timestamp);
+
+        emit USDGCredited(recipient, amountOut);
+        emit BridgeRequestEmitted(
+            requestId,
+            amountOut,
+            recipient,
+            nonce,
+            block.timestamp
+        );
         emit TokenSwapped(amount, amountOut);
     }
 
     function withdrawUSDG(uint256 amount) external {
         if (amount == 0) revert ZeroAmount();
-        if (stableToken.balanceOf(address(this)) < amount) revert InsufficientBalance();
-        stableToken.transfer(msg.sender, amount);
+
+        uint256 credit = withdrawableUSDG[msg.sender];
+        if (credit < amount) revert InsufficientCredit();
+        if (stableToken.balanceOf(address(this)) < amount) {
+            revert InsufficientBalance();
+        }
+
+        withdrawableUSDG[msg.sender] = credit - amount;
+        stableToken.safeTransfer(msg.sender, amount);
+
+        emit USDGWithdrawn(msg.sender, amount);
     }
 
-    function _swapToStable(uint256 amount) internal returns (uint256) {
+    function approveRouter(uint256 amount) external onlyOwner {
+        openLaunchToken.forceApprove(router, amount);
+        emit RouterApprovalUpdated(address(openLaunchToken), router, amount);
+    }
+
+    function _swapToStable(
+        uint256 amount,
+        uint256 amountOutMin
+    ) internal returns (uint256) {
         address[] memory path = new address[](2);
         path[0] = address(openLaunchToken);
         path[1] = address(stableToken);
 
-        (bool success, bytes memory data) = router.call{value: 0}(
+        (bool success, bytes memory data) = router.call(
             abi.encodeWithSignature(
                 "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)",
                 amount,
-                0,
+                amountOutMin,
                 path,
                 address(this),
                 block.timestamp
             )
         );
-        require(success, "Swap failed");
+
+        if (!success) revert SwapFailed();
+        if (data.length == 0) revert InvalidSwapReturnData();
 
         uint256[] memory amounts = abi.decode(data, (uint256[]));
+        if (amounts.length == 0) revert InvalidSwapReturnData();
+
         return amounts[amounts.length - 1];
-    }
-
-    function setRouter(address _router) external onlyOwner {
-        if (_router == address(0)) revert ZeroAddress();
-        emit RouterUpdated(router, _router);
-        router = _router;
-    }
-
-    function setStableToken(address _stable) external onlyOwner {
-        if (_stable == address(0)) revert ZeroAddress();
-        emit StableTokenUpdated(address(stableToken), _stable);
-        stableToken = IERC20(_stable);
-    }
-
-    function setMaxSlippage(uint256 _maxSlippageBps) external onlyOwner {
-        maxSlippageBps = _maxSlippageBps;
     }
 }

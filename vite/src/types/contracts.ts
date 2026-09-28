@@ -124,6 +124,31 @@ export interface EthYieldVault {
   }
 }
 
+// RobinhoodDepositAdapter interface
+export interface RobinhoodDepositAdapter {
+  functions: {
+    approveRouter: (params: { amount: bigint }) => Promise<void>
+    depositAndBridge: (params: { amount: bigint; amountOutMin: bigint; recipient: string }) => Promise<{ requestId: bigint; amountOut: bigint }>
+    nonce: () => Promise<bigint>
+    openLaunchToken: () => Promise<string>
+    owner: () => Promise<string>
+    renounceOwnership: () => Promise<void>
+    router: () => Promise<string>
+    stableToken: () => Promise<string>
+    transferOwnership: (params: { newOwner: string }) => Promise<void>
+    withdrawUSDG: (params: { amount: bigint }) => Promise<void>
+    withdrawableUSDG: (params: { account: string }) => Promise<bigint>
+  }
+  events: {
+    BridgeRequestEmitted: (params: { requestId: bigint; amount: bigint; recipient: string; nonce: bigint; timestamp: bigint }) => void
+    OwnershipTransferred: (params: { previousOwner: string; newOwner: string }) => void
+    RouterApprovalUpdated: (params: { token: string; router: string; amount: bigint }) => void
+    TokenSwapped: (params: { amountIn: bigint; amountOut: bigint }) => void
+    USDGCredited: (params: { recipient: string; amount: bigint }) => void
+    USDGWithdrawn: (params: { recipient: string; amount: bigint }) => void
+  }
+}
+
 // Token interfaces
 export interface ERC20 {
   functions: {

@@ -1,36 +1,14 @@
+import { ROBINHOOD_ADAPTER_ABI } from './robinhoodAdapterABI'
+
 export const WETH = '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73'
 
 export const ROBINHOOD_ROUTER = '0x8876789976dEcBfCbBbe364623C63652db8C0904'
 
 export const ROBINHOOD_LJB_TOKEN = '0xF0C81b03A33463272a5466AfAeD628989A030F82'
 
-export const ROBINHOOD_ADAPTER_ADDRESS = '0x27c1884B8b1487d7a727a61746151401e32499B1'
+export const ROBINHOOD_ADAPTER_ADDRESS = '0xC36A19b8910273Cf4a030EA5612e63B66fBfeA03'
 
 export const USDG_ETHEREUM = '0xe343167631d89B6Ffc58B88d6b7fB0228795491D'
-
-export const ROBINHOOD_ADAPTER_ABI = [
-  {
-    inputs: [{ name: 'amount', type: 'uint256' }, { name: 'recipient', type: 'address' }],
-    name: 'depositAndBridge',
-    outputs: [{ name: 'requestId', type: 'uint256' }, { name: 'amountOut', type: 'uint256' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'amount', type: 'uint256' }],
-    name: 'withdrawUSDG',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'spender', type: 'address' }, { name: 'amount', type: 'uint256' }],
-    name: 'approve',
-    outputs: [{ name: 'success', type: 'bool' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-] as const
 
 export const CONTRACTS = {
   botChain: {

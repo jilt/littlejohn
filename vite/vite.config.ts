@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@vault-abi': path.resolve(__dirname, '../out/EthYieldVault.sol/EthYieldVault.json'),
+      '@robinhood-adapter-abi': path.resolve(__dirname, '../out/RobinhoodDepositAdapter.sol/RobinhoodDepositAdapter.json'),
     },
   },
   server: {

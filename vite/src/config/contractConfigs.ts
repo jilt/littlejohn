@@ -12,12 +12,18 @@ export const ROBINHOOD_ADAPTER_CONFIG = {
       name: 'depositAndBridge',
       inputs: [
         { name: 'amount', type: 'uint256' },
+        { name: 'amountOutMin', type: 'uint256' },
         { name: 'recipient', type: 'address' },
       ],
       outputs: [{ name: 'requestId', type: 'uint256' }, { name: 'amountOut', type: 'uint256' }],
     },
     withdrawUSDG: {
       name: 'withdrawUSDG',
+      inputs: [{ name: 'amount', type: 'uint256' }],
+      outputs: [],
+    },
+    approveRouter: {
+      name: 'approveRouter',
       inputs: [{ name: 'amount', type: 'uint256' }],
       outputs: [],
     },
